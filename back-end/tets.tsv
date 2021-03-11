@@ -1,0 +1,56 @@
+trait1	trait2	cor
+Type 2 Diabetes	Fasting glucose main effect	1.0204
+Type 2 Diabetes	Triglycerides in small HDL	0.8704
+Type 2 Diabetes	Illnesses of mother: Diabetes	1.183
+Type 2 Diabetes	Illnesses of siblings: Diabetes	1.1595
+Type 2 Diabetes	HOMA-IR	0.9674
+Fasting glucose main effect	HOMA-IR	0.7077
+HOMA-IR	Triglycerides in small HDL	1.3068
+HOMA-IR	Treatment/medication code: ezetimibe	0.6249
+HOMA-IR	Illnesses of father: Diabetes	0.6918
+HOMA-IR	Illnesses of mother: Diabetes	0.8547
+HOMA-IR	Illnesses of siblings: Diabetes	0.523
+Fasting glucose main effect	Triglycerides in small HDL	-0.0818
+Type 2 Diabetes	Treatment/medication code: insulin product	0.8018
+Fasting glucose main effect	Treatment/medication code: insulin product	0.5403
+HOMA-IR	Treatment/medication code: insulin product	0.8093
+Triglycerides in small HDL	Treatment/medication code: insulin product	0.4219
+Treatment/medication code: insulin product	Treatment/medication code: ezetimibe	0.6835
+Treatment/medication code: insulin product	Illnesses of father: Diabetes	0.8786
+Treatment/medication code: insulin product	Illnesses of mother: Diabetes	0.7027
+Treatment/medication code: insulin product	Illnesses of siblings: Diabetes	0.9983
+Treatment/medication code: insulin product	Medication for cholesterol_ blood pressure or diabetes: Insulin	1.1384
+Type 2 Diabetes	Treatment/medication code: furosemide	0.9357
+Fasting glucose main effect	Treatment/medication code: furosemide	0.8787
+HOMA-IR	Treatment/medication code: furosemide	1.407
+Triglycerides in small HDL	Treatment/medication code: furosemide	0.9562
+Treatment/medication code: insulin product	Treatment/medication code: furosemide	0.9579
+Treatment/medication code: furosemide	Treatment/medication code: ezetimibe	1.3217
+Treatment/medication code: furosemide	Illnesses of father: Diabetes	1.0023
+Treatment/medication code: furosemide	Illnesses of mother: Diabetes	0.8226
+Treatment/medication code: furosemide	Illnesses of siblings: Diabetes	1.1464
+Treatment/medication code: furosemide	Medication for cholesterol_ blood pressure or diabetes: Insulin	1.1744
+Type 2 Diabetes	Treatment/medication code: ezetimibe	0.8725
+Fasting glucose main effect	Treatment/medication code: ezetimibe	0.4705
+Triglycerides in small HDL	Treatment/medication code: ezetimibe	1.7429
+Treatment/medication code: ezetimibe	Illnesses of mother: Diabetes	0.3919
+Treatment/medication code: ezetimibe	Illnesses of siblings: Diabetes	0.6294
+Type 2 Diabetes	Illnesses of father: Diabetes	1.1705
+Fasting glucose main effect	Illnesses of father: Diabetes	0.6217
+Triglycerides in small HDL	Illnesses of father: Diabetes	0.3328
+Treatment/medication code: ezetimibe	Illnesses of father: Diabetes	0.3387
+Illnesses of father: Diabetes	Illnesses of mother: Diabetes	0.8349
+Illnesses of father: Diabetes	Illnesses of siblings: Diabetes	0.942
+Fasting glucose main effect	Illnesses of mother: Diabetes	0.6835
+Triglycerides in small HDL	Illnesses of mother: Diabetes	0.6513
+Fasting glucose main effect	Illnesses of siblings: Diabetes	0.6439
+Triglycerides in small HDL	Illnesses of siblings: Diabetes	0.5645
+Illnesses of mother: Diabetes	Illnesses of siblings: Diabetes	1.0292
+Type 2 Diabetes	Medication for cholesterol_ blood pressure or diabetes: Insulin	1.0385
+Fasting glucose main effect	Medication for cholesterol_ blood pressure or diabetes: Insulin	0.5888
+HOMA-IR	Medication for cholesterol_ blood pressure or diabetes: Insulin	0.8118
+Triglycerides in small HDL	Medication for cholesterol_ blood pressure or diabetes: Insulin	0.1916
+Treatment/medication code: ezetimibe	Medication for cholesterol_ blood pressure or diabetes: Insulin	0.8815
+Illnesses of father: Diabetes	Medication for cholesterol_ blood pressure or diabetes: Insulin	1.0255
+Illnesses of mother: Diabetes	Medication for cholesterol_ blood pressure or diabetes: Insulin	0.9096
+Illnesses of siblings: Diabetes	Medication for cholesterol_ blood pressure or diabetes: Insulin	1.2449
