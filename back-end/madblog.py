@@ -4,7 +4,7 @@ import sys
 from flask_babel import gettext as _
 from app import create_app
 from app.extensions import db
-from app.models import  GWAS2Traits, Genetic_Cor, GWAS2Traits2, Gwaspairs2cor
+from app.models import  GWAS2Traits, Genetic_Cor_HDL, Genetic_Cor_LDSC, GWAS2Traits2
 from config import Config
 
 app = create_app(Config)

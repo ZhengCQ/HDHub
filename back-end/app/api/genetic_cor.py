@@ -38,8 +38,8 @@ def trait_queryinfodetail():
     return jsonify({'code': 200, 'data': traits_infos})
 
 
-@bp.route('/pair_genetic_cor', methods=['POST'])
-def query_geneticcor():
+@bp.route('/pair_genetic_cor/<rgmodel>', methods=['POST'])
+def query_geneticcor(rgmodel):
     data = request.get_json()
     query = data['query']
     value = data['value']
@@ -47,12 +47,42 @@ def query_geneticcor():
     ### values from front
     page = query['page']
     page_size = query['page_size']
-
+    print(filter_cut)
     ### Trait1 info
     starttime = datetime.datetime.now()
-    gwas = GWAS2Traits.query.filter(GWAS2Traits.Filename == value[0]).first()
-    cor_ids = ([i.Cor_id for i in Gwaspairs2cor.query.filter(Gwaspairs2cor.Trait1_id == gwas.id).all()])
-    
+
+    cor_ids = ([i.id for i in Genetic_Cor_HDL.query.filter(Genetic_Cor_HDL.gwas1.in_(value)).all()])
+    """
+    outdata = Gwaspairs2cor.to_collection_dict(
+        Gwaspairs2cor.query.filter(
+        and_(Gwaspairs2cor.Trait1_id.in_(value)
+            )
+        ).outerjoin(Genetic_Cor_HDL).filter(
+                    and_(Genetic_Cor_HDL.p<0.05,Genetic_Cor_HDL.id.in_(cor_ids))).order_by(Genetic_Cor_HDL.cor.desc()),\
+            page, page_size)
+    """
+    if rgmodel == 'hdl':
+        outdata = Genetic_Cor_HDL().to_collection_dict(
+        Genetic_Cor_HDL().query.filter(
+                        and_(or_(Genetic_Cor_HDL.gwas1.in_(value),Genetic_Cor_HDL.gwas2.in_(value)),
+                            Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
+                         or_(
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
+                            )).order_by(Genetic_Cor_HDL.cor.desc()),\
+                page, page_size)
+    else:
+        outdata = Genetic_Cor_LDSC().to_collection_dict(
+        Genetic_Cor_LDSC().query.filter(
+                        and_(or_(Genetic_Cor_LDSC.p1.in_(value),Genetic_Cor_LDSC.p2.in_(value)),
+                            Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
+                        or_(
+                            and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
+                            and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
+                            )).order_by(Genetic_Cor_LDSC.rg.desc()),\
+                page, page_size)       
+
+    """
     data = Genetic_Cor.to_collection_dict(
         Genetic_Cor.query.filter(
                       and_(Genetic_Cor.id.in_(cor_ids),
@@ -62,9 +92,10 @@ def query_geneticcor():
                             and_(Genetic_Cor.cor >= filter_cut['n_cor'][0],Genetic_Cor.cor <= filter_cut['n_cor'][1])) 
                      )).order_by(Genetic_Cor.cor.desc()),\
                 page, page_size)
+    """
     endtime = datetime.datetime.now()
     print ((endtime - starttime))
-    return jsonify({'code': 200,'data':data})
+    return jsonify({'code': 200,'data':outdata})
 
 @bp.route('/pair_genetic_cor/<int:id>', methods=['GET'])
 def query_detail(id):

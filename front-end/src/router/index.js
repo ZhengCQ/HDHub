@@ -38,6 +38,11 @@ export const constantRoutes = [
     name: 'Genetic_cor',
     component: () => import('@/views/genetic_cor/index')
   },
+  {
+    path: '/genetic_cor_new',
+    name: 'Genetic_cor_new',
+    component: () => import('@/views/genetic_cor_new/index')
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]

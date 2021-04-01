@@ -16,9 +16,9 @@ export function queryInfoDetail(data) {
   })
 }
 
-export function postPairCor(data) {
+export function postPairCor(data,model) {
     return request({
-      url: `/api/pair_genetic_cor`,
+      url: `/api/pair_genetic_cor/${model}`,
       method: 'post',
       data
     })

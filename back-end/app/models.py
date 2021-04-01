@@ -23,13 +23,14 @@ gwaspairs2cor = db.Table('gwaspairs2cor',
                        db.Column('Cor_id',db.Integer,db.ForeignKey("genetic_cor.id"))
                        )
 """
-
+"""
 class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
     __tablename__ = 'gwaspairs2cor'
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     Trait1_id = db.Column(db.Integer,db.ForeignKey("gwas2traits.id"))
     Trait2_id = db.Column(db.Integer,db.ForeignKey("gwas2traits2.id"))
+    Cor_id = db.Column(db.Integer,db.ForeignKey("genetic_cor.id"))
     Cor_id = db.Column(db.Integer,db.ForeignKey("genetic_cor.id"))
     trait1 = db.relationship('GWAS2Traits')
     trait2 = db.relationship('GWAS2Traits2')
@@ -52,6 +53,41 @@ class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
         }
         return data
 
+"""
+class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
+    __tablename__ = 'gwaspairs2cor_all'
+    __table_args__ = {"extend_existing": True}
+    id = db.Column(db.Integer, primary_key=True)
+    Trait1_id = db.Column(db.Integer,db.ForeignKey("gwas2traits.id"))
+    Trait2_id = db.Column(db.Integer,db.ForeignKey("gwas2traits2.id"))
+    Cor_id_hdl = db.Column(db.Integer,db.ForeignKey("genetic_cor_hdl.id"))
+    Cor_id_ldsc = db.Column(db.Integer,db.ForeignKey("genetic_cor_ldsc.id"))
+
+    trait1 = db.relationship('GWAS2Traits')
+    trait2 = db.relationship('GWAS2Traits2')
+    cor_hdl = db.relationship('Genetic_Cor_HDL')
+    cor_ldsc = db.relationship('Genetic_Cor_LDSC')
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'gwas1_id':self.trait1.id,
+            'gwas2_id':self.trait2.id,
+            'trait1':self.trait1.Trait,
+            'trait2':self.trait2.Trait,
+            'gwas1': self.trait1.Filename,
+            'gwas2': self.trait2.Filename,
+            'cov': self.cor_hdl.cov,
+            'cov_se': self.cor_hdl.cov_se,
+            'cor': self.cor_hdl.cor,
+            'cor_se': self.cor_hdl.cor_se,
+            'p': self.cor_hdl.p,
+            'h1':self.cor_hdl.h1,
+            'h1_se':self.cor_hdl.h1_se,
+            'h2':self.cor_hdl.h2,
+            'h2_se':self.cor_hdl.h2_se,
+        }
+        return data
 
 class GWAS2Traits2(db.Model):
     __tablename__ = 'gwas2traits2'
@@ -88,7 +124,7 @@ class GWAS2Traits(db.Model):
         }
         return data
 
-
+"""
 class Genetic_Cor(PaginatedAPIMixin,db.Model):
     __tablename__ = 'genetic_cor'
     id    = db.Column(db.Integer, primary_key=True)
@@ -119,4 +155,89 @@ class Genetic_Cor(PaginatedAPIMixin,db.Model):
             'p': self.p
         }
         return data
+"""
 
+
+class Genetic_Cor_HDL(PaginatedAPIMixin,db.Model):
+    __tablename__ = 'genetic_cor_hdl'
+    id    = db.Column(db.Integer, primary_key=True)
+    gwas1 = db.Column(db.Integer)
+    gwas2 = db.Column(db.Integer)
+    h1   = db.Column(db.REAL)
+    h1_se = db.Column(db.REAL)
+    h2   = db.Column(db.REAL)
+    h2_se = db.Column(db.REAL)   
+    cov   = db.Column(db.REAL)
+    cov_se = db.Column(db.REAL)
+    cor   = db.Column(db.REAL)
+    cor_se = db.Column(db.REAL)
+    p = db.Column(db.REAL)
+    pairs = db.relationship('Gwaspairs2cor', lazy='dynamic')
+
+    def to_dict(self):
+        gwas1_info = self.pairs.first().trait1
+        gwas2_info = self.pairs.first().trait2
+        data = {
+            'id': self.id,
+            'gwas1_id':gwas1_info.id,
+            'gwas2_id':gwas2_info.id,
+            'trait1':gwas1_info.Trait,
+            'trait2':gwas2_info.Trait,
+            'gwas1': gwas1_info.Filename,
+            'gwas2': gwas2_info.Filename,
+            'h1':self.h1,
+            'h1_se':self.h1_se,
+            'h2':self.h2,
+            'h2_se':self.h2_se,
+            'cov': self.cov,
+            'cov_se': self.cov_se,
+            'cor': self.cor,
+            'cor_se': self.cor_se,
+            'p': self.p
+        }
+        return data
+
+
+class Genetic_Cor_LDSC(PaginatedAPIMixin,db.Model):
+    __tablename__ = 'genetic_cor_ldsc'
+    id    = db.Column(db.Integer, primary_key=True)
+    p1 = db.Column(db.Integer)
+    p2 = db.Column(db.Integer)
+    rg   = db.Column(db.REAL)
+    se   = db.Column(db.REAL)
+    z   = db.Column(db.REAL)
+    p = db.Column(db.REAL)
+    h2_obs_p1  = db.Column(db.REAL)
+    h2_obs_se_p1  = db.Column(db.REAL)
+    h2_int_p1  = db.Column(db.REAL)
+    h2_int_se_p1   = db.Column(db.REAL)
+    h2_obs_p2   = db.Column(db.REAL)
+    h2_obs_se_p2   = db.Column(db.REAL)
+    h2_int_p2   = db.Column(db.REAL)
+    h2_int_se_p2   = db.Column(db.REAL)
+    gcov_int = db.Column(db.REAL)
+    gcov_int_se = db.Column(db.REAL)
+    pairs = db.relationship('Gwaspairs2cor', lazy='dynamic')
+
+    def to_dict(self):
+        gwas1_info = self.pairs.first().trait1
+        gwas2_info = self.pairs.first().trait2
+        data = {
+            'id': self.id,
+            'gwas1_id':gwas1_info.id,
+            'gwas2_id':gwas2_info.id,
+            'trait1':gwas1_info.Trait,
+            'trait2':gwas2_info.Trait,
+            'gwas1': gwas1_info.Filename,
+            'gwas2': gwas2_info.Filename,
+            'h1':self.h2_obs_p1,
+            'h1_se':self.h2_obs_se_p1,
+            'h2':self.h2_obs_p2,
+            'h2_se':self.h2_obs_se_p2,
+            'cov': self.gcov_int,
+            'cov_se': self.gcov_int_se,
+            'cor': self.rg,
+            'cor_se': self.se,
+            'p': self.p
+        }
+        return data

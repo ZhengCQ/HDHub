@@ -109,7 +109,6 @@
               <el-input-number v-model="fig1aform.p_cutoff" :min="0" :max="1" :step="0.01" placeholder="Max" />
             </div>
           </el-form-item>
-
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="formVis_fig1a = false">取 消</el-button>

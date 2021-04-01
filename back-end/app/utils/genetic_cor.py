@@ -1,4 +1,4 @@
-from app.models import Genetic_Cor
+from app.models import Genetic_Cor_LDSC, Genetic_Cor_LDSC
 from sqlalchemy import or_,and_
 import pandas as pd
 import numpy as np

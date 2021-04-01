@@ -5,36 +5,19 @@
         <h1>GWAS summary trait</h1>
       </div>
       <div>
-        <el-form ref="form" :model="form" class="summit-form">
-          <el-form-item>
-            <el-select
-              v-model="form.traits"
-              filterable
-              multiple
-              remote
-              :remote-method="queryTraits"
-              placeholder="input traits name. eg: Type 2 Diabates"
-            >
-              <el-option
-                v-for="item in gene_options"
-                :key="item.index"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item align="center">
-            <el-button
-              round
-              plain
-              type="primary"
-              icon="el-icon-search"
-              style="margin-bottom: 30px"
-              @click="queryTraitsDetail"
-              >GO
-            </el-button>
-          </el-form-item>
-        </el-form>
+        <div class="summit-form">
+        <search-traits @traitsDetailData="getTraitsData"></search-traits>
+        </div>
+  
+   <!-- GWAS性状筛选 开始-->
+      <div v-if="traitsDetailData" align="center">
+        <gwas-table ref="gwastab" @gwasSel="getGwasSel" :key ="timer" :tableinfo="traitsDetailData"></gwas-table>
+        <!--表格 结束-->
+        <div style="margin-top: 20px">
+          <el-button @click="getTables();">Explore</el-button>
+        </div>
+      </div>
+      <!-- GWAS性状筛选 结束-->
         <div class="row">
           <div class="col-xs-6 col-md-4">
             <h5>
@@ -64,63 +47,48 @@
     </div>
   </div>
 </template>
-<script>
-import { queryInfo, queryInfoDetail } from "@/api/genetic_cor";
 
-export default {
-  data() {
-    return {
-      form: {
-        traits: "",
-      },
-      gene_options: [],
-    };
-  },
-  methods: {
-    queryTraits(queryString, cb) {
-      var list = [];
-      queryInfo({
-        value: queryString,
-      })
-        .then((res) => {
-          var pheinfo = res.data;
-          for (const i in pheinfo) {
-            list.push({
-              value: pheinfo[i],
-            });
-          }
-          // list = queryString ? list.filter(this.createFilter(queryString)) : list
-          this.gene_options = list;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+<script>
+  import SearchTraits from './SearchTraits.vue'
+  import GwasTable from './GwasTable.vue'
+  
+  export default {
+    name: 'Home',
+    
+    components: {
+      SearchTraits,
+      GwasTable,
     },
-    queryTraitsDetail() {
-      this.reset_datainfo();
-      queryInfoDetail({
-        value: this.form,
-      }).then((res) => {
-        this.traitsDetailData = res.data;
-        // 默认选择
-        this.$nextTick(function () {
-          this.toggleSelection(this.traitsDetailData, "traitstab");
-        });
-      });
+    data() {
+      return{
+          traitsDetailData:"",
+          timer:""
+      }
     },
-  },
-};
+    methods:{
+    getTraitsData(data){
+      // timer 作为key，每次加载都重置
+      this.timer = new Date().getTime()
+      this.traitsDetailData = data
+    },
+
+    getGwasSel(data){
+      this.multiSel = data
+    },
+    getTables() {
+      var tgt_gwas = []
+      this.multiSel.forEach((val) => {
+        tgt_gwas.push(val.id)
+     })
+     this.$router.push({name:'Genetic_cor_new',params:{'gwas':tgt_gwas}});
+    }
+    }
+  }
+
 </script>
 
 
 <style lang="scss" scoped>
-.el-select {
-  position: relative;
-  font-size: 16px;
-  display: inline-block;
-  width: 100%;
-}
-
 .summit-form {
   position: relative;
   max-width: 100%;
@@ -139,4 +107,5 @@ export default {
     width: 90%;
   }
 }
+
 </style>
