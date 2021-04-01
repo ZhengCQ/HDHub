@@ -1,9 +1,6 @@
 <template>
   <el-container style="border: 1px solid #eee; padding-top: 55px">
-    <el-aside width="250px" style="background-color: rgb(238, 241, 246)">
-      <div class="summit-form">
-        <search-traits :sel_traits="traits"></search-traits>
-      </div>
+    <el-aside width="250px" style="background-color: rgb(238, 241, 246);padding-top:50px;">
       <div style="text-align: center">
         <el-switch
           style="display: block"
@@ -16,6 +13,29 @@
         >
         </el-switch>
       </div>
+
+      <div class="summit-form">
+        <h5>Trait1</h5>
+        <search-traits :sel_traits="traits"></search-traits>
+      </div>
+      <div>
+        
+        <h5>Trait2</h5>
+        <div style="text-align: center">
+        <el-switch
+          style="display: block"
+          v-model="isTop"
+          active-color="#13ce66"
+          inactive-color="#ff4949"
+          active-text="Top"
+          inactive-text="Optional"
+          @change="changeTrait2Model"
+        >
+        </el-switch>
+      </div>
+      <el-button> NetGraph</el-button>
+      </div>
+
     </el-aside>
 
     <el-container>
@@ -49,6 +69,7 @@
             :gwasIds="gwas_ids" 
             :rgModel="rgmodel" 
             :filterInfo="setParaInfo"
+            :isTop="isTop"
             ref="rgtable"></rg-table>            
           </el-tab-pane>
           
@@ -83,6 +104,7 @@ export default {
       traits: [],
       gwas_ids: [],
       ishdl: true,
+      isTop: true,
       rgmodel: "hdl",
       barPlotData: "",
       activeName: 'first',
@@ -114,8 +136,12 @@ export default {
       this.getInfo()
       this.$refs.rgtable.multiSel = []
     },
+    changeTrait2Model(){
+      this.getInfo()
+    },
     getBarData(data) {
       this.barPlotData = data
+      console.log(this.barPlotData)
     },
     fig1aset(){
       this.isSetup = false
@@ -144,7 +170,7 @@ export default {
 }
 
 .summit-form {
-  padding-top: 50px;
+  padding-top: 20px;
   position: relative;
   max-width: 95%;
   margin: 0 auto;

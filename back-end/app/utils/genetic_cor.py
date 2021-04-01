@@ -33,8 +33,8 @@ def fetch_paired_gwas(gwas1, gwas2_lst, filter_cut):
 
 def trans_order_table(gwas1,data):
     trans_data = []
-    for each in data['items']:
-        if each['gwas2'] == gwas1.Filename:
+    for each in data:
+        if each['gwas2_id'] == gwas1:
             each['trait1'],each['trait2'] = each['trait2'],each['trait1']
             each['gwas1'],each['gwas2'] = each['gwas2'],each['gwas1']
         trans_data.append(each)

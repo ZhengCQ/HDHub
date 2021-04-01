@@ -52,6 +52,9 @@ export default {
     },
     filterInfo:{
       type: Object
+    },
+    isTop:{
+      type: Boolean
     }
   },
   data() {
@@ -139,6 +142,13 @@ export default {
       ],
     };
   },
+  watch: {
+    multiSel: function(val) {
+      if (!this.isTop) {
+        this.getBarPic()
+      }
+    }
+  },
   methods: {
     getRowKeys(row) {
       return row.id
@@ -172,7 +182,7 @@ export default {
     },
     getBarPic() {
       this.reset_bar()
-      var bar_table = (this.multiSel.length > 0 ? this.multiSel : this.tableData)
+      var bar_table = (this.isTop ? this.tableData: this.multiSel)
       var sorted_keys_array = Object.keys(bar_table).sort((a, b) => {
         return bar_table[b].cor - bar_table[a].cor
       })

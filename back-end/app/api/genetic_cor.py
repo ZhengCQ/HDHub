@@ -47,11 +47,9 @@ def query_geneticcor(rgmodel):
     ### values from front
     page = query['page']
     page_size = query['page_size']
-    print(filter_cut)
     ### Trait1 info
     starttime = datetime.datetime.now()
 
-    cor_ids = ([i.id for i in Genetic_Cor_HDL.query.filter(Genetic_Cor_HDL.gwas1.in_(value)).all()])
     """
     outdata = Gwaspairs2cor.to_collection_dict(
         Gwaspairs2cor.query.filter(
@@ -71,6 +69,7 @@ def query_geneticcor(rgmodel):
                             and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_HDL.cor.desc()),\
                 page, page_size)
+        
     else:
         outdata = Genetic_Cor_LDSC().to_collection_dict(
         Genetic_Cor_LDSC().query.filter(
@@ -80,19 +79,9 @@ def query_geneticcor(rgmodel):
                             and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
                             and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_LDSC.rg.desc()),\
-                page, page_size)       
-
-    """
-    data = Genetic_Cor.to_collection_dict(
-        Genetic_Cor.query.filter(
-                      and_(Genetic_Cor.id.in_(cor_ids),
-                          Genetic_Cor.p <= filter_cut['p_cutoff'],
-                        or_(
-                            and_(Genetic_Cor.cor >= filter_cut['p_cor'][0],Genetic_Cor.cor <= filter_cut['p_cor'][1]),
-                            and_(Genetic_Cor.cor >= filter_cut['n_cor'][0],Genetic_Cor.cor <= filter_cut['n_cor'][1])) 
-                     )).order_by(Genetic_Cor.cor.desc()),\
                 page, page_size)
-    """
+                
+    outdata['items'] = trans_order_table(value[0],outdata['items'])
     endtime = datetime.datetime.now()
     print ((endtime - starttime))
     return jsonify({'code': 200,'data':outdata})
