@@ -97,32 +97,109 @@ def query_detail(id):
 def query_cycle_geneticcor():
     data = request.get_json()
     query = data['query']
-    gwaslst = data['value']
+    gwaslst = data['value'][0]
     filter_cut = data['filter']
     ### values from front
     page = query['page']
     page_size = query['page_size']
-
     starttime = datetime.datetime.now()
-    
-    outdata = Gwaspairs2cor.to_collection_dict(
-        Gwaspairs2cor.query.filter(
+    info_query = Gwaspairs2cor.query.filter(
         and_(Gwaspairs2cor.Trait1_id.in_(gwaslst),
              Gwaspairs2cor.Trait2_id.in_(gwaslst)
             )
-        ).outerjoin(Genetic_Cor).filter(
+        ).outerjoin(Genetic_Cor_HDL).filter(
                       and_(
-                          Genetic_Cor.p <= filter_cut['p_cutoff'],
+                          Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
                         or_(
-                            and_(Genetic_Cor.cor >= filter_cut['p_cor'][0],Genetic_Cor.cor <= filter_cut['p_cor'][1]),
-                            and_(Genetic_Cor.cor >= filter_cut['n_cor'][0],Genetic_Cor.cor <= filter_cut['n_cor'][1])) 
-                     )).order_by(Gwaspairs2cor.Trait1_id.desc()),\
-                page, page_size)
-                
-    endtime = datetime.datetime.now()
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1])) 
+                     )).order_by(Gwaspairs2cor.Trait1_id.desc())
 
+    outdata = Gwaspairs2cor.to_collection_dict(info_query,page, page_size)
+
+    df = pd.DataFrame([i.to_dict() for i in info_query.all()])[['trait1','trait2','cor']]
+    hData,hcol = pre_heatmap(df)
+    nodes,links = pre_network(df)
+
+    endtime = datetime.datetime.now()
     print ((endtime - starttime))
-    return jsonify({'code': 200, 'data': outdata})
+    return jsonify({'code': 200, 'data': outdata, 'heatmap':{'data':hData,'col':hcol},'network':{'nodes':nodes,'links':links}})
+
+
+@bp.route('/hdl_ldscPairCor', methods=['POST'])
+def query_hdl_ldsc_geneticcor():
+    data = request.get_json()
+    query = data['query']
+    value = data['value']
+    filter_cut = data['filter']
+    ### values from front
+    page = query['page']
+    page_size = query['page_size']
+    ### Trait1 info
+    starttime = datetime.datetime.now()
+    gwas1 = value[0]
+    gwas2 = value[1:]
+
+    hdl_data = Genetic_Cor_HDL().to_collection_dict(
+        Genetic_Cor_HDL().query.filter(
+                        and_(or_(
+                            and_(Genetic_Cor_HDL.gwas1 == gwas1,Genetic_Cor_HDL.gwas2.in_(gwas2)),
+                            and_(Genetic_Cor_HDL.gwas1.in_(gwas2),Genetic_Cor_HDL.gwas2 == gwas1)
+                            ),
+                            Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
+                         or_(
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                            and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
+                            )).order_by(Genetic_Cor_HDL.cor.desc()),\
+                page, page_size)
+    hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
+    df_hdl = pd.DataFrame(hdl_data['items'])
+    df_hdl.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_HDL' for i in df_hdl])
+    df_hdl.drop(['gwas1','gwas2'],axis=1,inplace=True)
+    df_hdl.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+
+    ldsc_data = Genetic_Cor_LDSC().to_collection_dict(
+        Genetic_Cor_LDSC().query.filter(
+                        and_(or_(
+                            and_(Genetic_Cor_LDSC.p1 == gwas1,Genetic_Cor_LDSC.p2.in_(gwas2)),
+                            and_(Genetic_Cor_LDSC.p1.in_(gwas2),Genetic_Cor_LDSC.p2 == gwas1)
+                            ),
+                            Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
+                         or_(
+                            and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
+                            and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
+                            )).order_by(Genetic_Cor_LDSC.rg.desc()),\
+                page, page_size)
+    ldsc_data['items'] = trans_order_table(gwas1,ldsc_data['items'])
+    #print(pd.DataFrame(hdl_data['items']))
+    #print(pd.DataFrame(ldsc_data['items']))
+
+    df_ldsc = pd.DataFrame(ldsc_data['items'])
+    df_ldsc.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_LDSC' for i in df_ldsc])
+    df_ldsc.drop(['gwas1','gwas2'],axis=1,inplace=True)
+    df_ldsc.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+
+    df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
+    items = df_m.head(page_size).reset_index().to_dict('records')
+    total_items = df_m.shape[0]
+    df_plot  = pd.DataFrame()
+    df_plot['trait'] = df_m['trait1_x'] + '_vs_' + df_m['trait2_x']
+    df_plot.loc[:,'cor_HDL'] = df_m['cor_HDL']
+    df_plot.loc[:,'cor_LDSC'] = df_m['cor_LDSC']
+    df_plot.loc[:,'cor_LDSC_min'] = df_plot['cor_LDSC']-df_m['cor_se_LDSC']*1.96
+    df_plot.loc[:,'cor_LDSC_max'] = df_plot['cor_LDSC']+df_m['cor_se_LDSC']*1.96  
+    df_plot.loc[:,'cor_HDL_min'] = df_plot['cor_HDL']-df_m['cor_se_HDL']*1.96
+    df_plot.loc[:,'cor_HDL_max'] = df_plot['cor_HDL']+df_m['cor_se_HDL']*1.96
+        
+    data_plot = df_plot.to_dict('split')['data']
+    #'id_HDL', 'trait1_x', 'trait2_x', 'h1_HDL', 'h1_se_HDL', 'h2_HDL',
+    #   'h2_se_HDL', 'cov_HDL', 'cov_se_HDL', 'cor_HDL', 'cor_se_HDL', 'p_HDL',
+    #   'id_LDSC', 'trait1_y', 'trait2_y', 'h1_LDSC', 'h1_se_LDSC', 'h2_LDSC',
+    #   'h2_se_LDSC', 'cov_LDSC', 'cov_se_LDSC', 'cor_LDSC', 'cor_se_LDSC',
+    #   'p_LDSC'
+
+    return jsonify({'code': 200, 'data':{'items':items,'total_items':total_items, 'data_plot': data_plot}})
+
 
 @bp.route('/cluster', methods=['POST'])
 def info2cluster():
@@ -144,4 +221,4 @@ def info2cluster():
     endtime = datetime.datetime.now()
 
     print ((endtime - starttime))
-    return jsonify({'code': 200, 'heatmap':{'data':hData,'col':hcol},'network':{'nodes':nodes,'links':links}})
+    return jsonify({'code': 200,  'heatmap':{'data':hData,'col':hcol},'network':{'nodes':nodes,'links':links}})

@@ -43,6 +43,16 @@ export const constantRoutes = [
     name: 'Genetic_cor_new',
     component: () => import('@/views/genetic_cor_new/index')
   },
+  {
+    path: '/netgraph',
+    name: 'Netgraph',
+    component: () => import('@/views/netgraph/index')
+  },
+  {
+    path: '/hdl_vs_ldsc',
+    name: 'HdlVsLdsc',
+    component: () => import('@/views/hdl_vs_ldsc/index')
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]

@@ -40,6 +40,13 @@
             <li class="nav-item">
               <router-link to="/genetic_cor_new" class="nav-link">Genetic Correlation New</router-link>
             </li>
+            <li class="nav-item">
+              <router-link to="/netgraph" class="nav-link">NetGraph</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/hdl_vs_ldsc" class="nav-link">HDL VS LDSC</router-link>
+            </li>
+
             <!--li class="nav-item">
               <router-link to="/help" class="nav-link">Help</router-link>
             </li-->

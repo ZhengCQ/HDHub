@@ -19,7 +19,6 @@
         <search-traits :sel_traits="traits"></search-traits>
       </div>
       <div>
-        
         <h5>Trait2</h5>
         <div style="text-align: center">
         <el-switch
@@ -141,7 +140,6 @@ export default {
     },
     getBarData(data) {
       this.barPlotData = data
-      console.log(this.barPlotData)
     },
     fig1aset(){
       this.isSetup = false
