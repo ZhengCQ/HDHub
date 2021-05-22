@@ -29,12 +29,6 @@ export default {
     Pagination,
   },
   props: {
-    gwasIds: {
-      type: Array,
-    },
-    rgModel: {
-      type: String
-    },
     filterInfo:{
       type: Object
     }
@@ -113,9 +107,9 @@ export default {
     };
   },
   methods: {
-    getTables() {
+    getTables(target_gwas_ids) {
       postHdlLdscPairCor({
-        value: this.gwasIds,
+        value: target_gwas_ids,
         query: this.listQuery,
         filter: this.filterInfo
       }).then((res) => {

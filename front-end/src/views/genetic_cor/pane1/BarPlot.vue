@@ -124,10 +124,10 @@ export default {
           text: this.className,
           subtext: this.subName,
           textStyle: {
-            fontSize: 28
+            fontSize: 26
           },
           subtextStyle:{
-            fontSize: 20
+            fontSize: 18
           },
           left: '40%'
         },

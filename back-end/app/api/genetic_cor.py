@@ -1,4 +1,6 @@
 import os
+
+from numpy.core.numeric import outer
 from app.extensions import db
 from flask import jsonify,request
 from app.api import bp
@@ -152,11 +154,14 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_HDL.cor.desc()),\
                 page, page_size)
-    hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
-    df_hdl = pd.DataFrame(hdl_data['items'])
-    df_hdl.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_HDL' for i in df_hdl])
-    df_hdl.drop(['gwas1','gwas2'],axis=1,inplace=True)
-    df_hdl.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+    if len(hdl_data['items'])>1:
+        hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
+        df_hdl = pd.DataFrame(hdl_data['items'])
+        df_hdl.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_HDL' for i in df_hdl])
+        df_hdl.drop(['gwas1','gwas2'],axis=1,inplace=True)
+        df_hdl.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+    else:
+        return jsonify({'code': 400, 'message': 'There are not any value in HDL database with current filtering'})
 
     ldsc_data = Genetic_Cor_LDSC().to_collection_dict(
         Genetic_Cor_LDSC().query.filter(
@@ -170,14 +175,15 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_LDSC.rg.desc()),\
                 page, page_size)
-    ldsc_data['items'] = trans_order_table(gwas1,ldsc_data['items'])
-    #print(pd.DataFrame(hdl_data['items']))
-    #print(pd.DataFrame(ldsc_data['items']))
-
-    df_ldsc = pd.DataFrame(ldsc_data['items'])
-    df_ldsc.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_LDSC' for i in df_ldsc])
-    df_ldsc.drop(['gwas1','gwas2'],axis=1,inplace=True)
-    df_ldsc.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+    
+    if len(ldsc_data['items'])>1:
+        ldsc_data['items'] = trans_order_table(gwas1,ldsc_data['items'])
+        df_ldsc = pd.DataFrame(ldsc_data['items'])
+        df_ldsc.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_LDSC' for i in df_ldsc])
+        df_ldsc.drop(['gwas1','gwas2'],axis=1,inplace=True)
+        df_ldsc.set_index(['gwas1_id', 'gwas2_id'],inplace=True)
+    else:
+        return jsonify({'code': 400, 'message': 'There are not any value in LDSC database with current filtering'})  
 
     df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
     items = df_m.head(page_size).reset_index().to_dict('records')

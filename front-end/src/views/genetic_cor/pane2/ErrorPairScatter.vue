@@ -36,19 +36,10 @@
       chartData: {
         deep: true,
         handler(val) {
-          
           this.setOptions(val)
-          
-          if (val.length > 10) {
-            this.autoHeight = val.length * 25 + 50
             this.chart.resize({
-              height: this.autoHeight
+              height: 550
             })
-          } else {
-            this.chart.resize({
-              height: 350
-            })
-          }
         }
       }
     },

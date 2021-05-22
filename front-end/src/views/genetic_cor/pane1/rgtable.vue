@@ -2,7 +2,7 @@
   <div>
         <!--页码 开始-->
     <pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size" @pagination="getTables(this.rgModel)" />
+      :limit.sync="listQuery.page_size" @pagination="getTables({rgModel})" />
     <!--页码 结束-->
     <!--表格 开始-->
     <el-table ref="traitsPairTable" 
@@ -12,7 +12,8 @@
       highlight-current-row style="width: 100%;"
       :row-key="getRowKeys"
       @selection-change="handleSelectionChange"
-      align="center">
+      align="center"
+      >
       </el-table-column>
       <el-table-column type="selection" :reserve-selection="true" width="55" />
       <el-table-column v-for="item in tableKey" :key="item.name" :label="item.label" :prop="item.prop"
@@ -146,6 +147,9 @@ export default {
       if (!this.isTop) {
         this.getBarPic()
       }
+    },
+    rgModel:function(val) {
+      this.$refs.traitsPairTable.clearSelection()
     }
   },
   methods: {
@@ -154,6 +158,7 @@ export default {
     },
     handleSelectionChange(val) {
       this.multiSel = val
+      console.log(this.multiSel)
     },
     getTables(rgModel) {
       postPairCor({

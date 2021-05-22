@@ -114,6 +114,7 @@ export default {
   },
   methods: {
     getTables() {
+      console.log(this.gwasIds)
       postHdlLdscPairCor({
         value: this.gwasIds,
         query: this.listQuery,

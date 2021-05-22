@@ -1,6 +1,9 @@
 <template>
   <el-container style="border: 1px solid #eee; padding-top: 55px">
-    <el-aside width="250px" style="background-color: rgb(238, 241, 246);padding-top:50px;">
+    <el-aside
+      width="250px"
+      style="background-color: rgb(238, 241, 246); padding-top: 50px"
+    >
       <div style="text-align: center">
         <el-switch
           style="display: block"
@@ -21,76 +24,83 @@
       <div>
         <h5>Trait2</h5>
         <div style="text-align: center">
-        <el-switch
-          style="display: block"
-          v-model="isTop"
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          active-text="Top"
-          inactive-text="Optional"
-          @change="changeTrait2Model"
-        >
-        </el-switch>
+          <el-switch
+            style="display: block"
+            v-model="isTop"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="Top"
+            inactive-text="Optional"
+            @change="changeTrait2Model"
+          >
+          </el-switch>
+        </div>
+        <el-button> NetGraph</el-button>
       </div>
-      <el-button> NetGraph</el-button>
-      </div>
-
     </el-aside>
 
     <el-container>
-      <set-para @fig1asetDialog="fig1aset" :isSetup="isSetup" :FormInfo="setParaInfo"></set-para>
+      <set-para
+        @fig1asetDialog="fig1aset"
+        :isSetup="isSetup"
+        :FormInfo="setParaInfo"
+      ></set-para>
       <el-header>
         <div style="text-align: left; font-size: 16px">
-            <i class="el-icon-setting el-icon--left" style="margin-right: 15px" @click="isSetup = true">数据设置</i>
+          <i
+            class="el-icon-setting el-icon--left"
+            style="margin-right: 15px"
+            @click="isSetup = true"
+            >数据设置</i
+          >
         </div>
       </el-header>
 
-
       <el-main>
         <el-tabs v-model="activeName" type="card">
-          <el-tab-pane label="Genetic Correlation" name="first">
-              <el-row style="background: #fff; padding: 0px 0px 0px 0px; width:100%">
+          <el-tab-pane label="BarPlot of Genetic Correlation" name="first">
+            <el-row
+              style="background: #fff; padding: 0px 0px 0px 0px; width: 100%"
+            >
               <div align="center" />
-             
-             <div v-if ="barPlotData">
-              <bar-plot
-                :key ="timer"
-                :class-name="subName"
-                :subName="traits[0]"
-                :chart-data="barPlotData.data"
-                :col-data="barPlotData.col"
-                :pval-data="barPlotData.pval"
-                :error-data="barPlotData.se"
-              />
-             </div>
+
+              <div v-if="barPlotData">
+                <bar-plot
+                  :key="timer"
+                  :class-name="subName"
+                  :subName="traits[0]"
+                  :chart-data="barPlotData.data"
+                  :col-data="barPlotData.col"
+                  :pval-data="barPlotData.pval"
+                  :error-data="barPlotData.se"
+                />
+              </div>
             </el-row>
-            <rg-table 
-            @barPlotData="getBarData" 
-            :gwasIds="gwas_ids" 
-            :rgModel="rgmodel" 
-            :filterInfo="setParaInfo"
-            :isTop="isTop"
-            ref="rgtable"></rg-table>            
+            <rg-table
+              @barPlotData="getBarData"
+              :gwasIds="gwas_ids"
+              :rgModel="rgmodel"
+              :filterInfo="setParaInfo"
+              :isTop="isTop"
+              ref="rgtable"
+            ></rg-table>
           </el-tab-pane>
-          
-          <el-tab-pane label="Scatter For HDL and LDSC" name="second">
-                        <div v-if ="scatterData">
+
+          <el-tab-pane label="Scatter of HDL VS LDSC" name="second">
+            <div v-if="scatterData">
               <error-pair-scatter
-                :key ="timer"
+                :key="timer"
                 :class-name="traits[0]"
                 :chart-data="scatterData"
               />
-             </div>
-        <pair-table
-          @ScatterPlotData="getScatterData"
-          :gwasIds="gwas_ids"
-          :rgModel="rgmodel"
-          :filterInfo="setParaInfo"
-          ref="pairtable"
-        >
-        </pair-table>
+            </div>
+            <pair-table
+              @ScatterPlotData="getScatterData"
+              :filterInfo="setParaInfo"
+              ref="pairtable"
+            >
+            </pair-table>
           </el-tab-pane>
-
         </el-tabs>
       </el-main>
     </el-container>
@@ -99,12 +109,12 @@
 
 
 <script>
-import SetPara from './setpara.vue'
+import SetPara from "./setpara.vue";
 import SearchTraits from "./SearchTraits.vue";
 import RgTable from "./pane1/rgtable.vue";
-import BarPlot from './pane1/BarPlot'
-import PairTable from "./pane2/table.vue"
-import ErrorPairScatter from "./pane2/ErrorPairScatter"
+import BarPlot from "./pane1/BarPlot";
+import PairTable from "./pane2/table.vue";
+import ErrorPairScatter from "./pane2/ErrorPairScatter";
 
 export default {
   name: "Genetic_cor",
@@ -114,7 +124,7 @@ export default {
     RgTable,
     BarPlot,
     PairTable,
-    ErrorPairScatter
+    ErrorPairScatter,
   },
   data() {
     return {
@@ -128,13 +138,13 @@ export default {
       subName: "Genetic Correction",
       barPlotData: "",
       scatterData: "",
-      activeName: 'first',
-      isSetup:false,
+      activeName: "first",
+      isSetup: false,
       setParaInfo: {
         p_cor: [0.2, 1.2],
         n_cor: [-1.2, -0.2],
         p_cutoff: 0.05,
-      }
+      },
     };
   },
   created() {
@@ -142,52 +152,54 @@ export default {
       this.gwas_ids = this.$route.params.gwas;
       this.traits = this.$route.params.traits;
     }
-    if (this.gwas_ids.length == 0){
+    if (this.gwas_ids.length == 0) {
       this.gwas_ids = [11];
       this.traits = ["Type 2 Diabetes"];
     }
   },
   mounted() {
-    this.getBarInfo()
-    this.subName = this.subName + " (" + this.rgmodel.toUpperCase() + ")"
+    this.getBarInfo();
   },
   watch: {
-      rgmodel: function(val){
-        this.subName = "Genetic Correction (" + val + ")"
-      },
-      activeName: function(val) {
-      if (val === 'second') {
-        console.log(this.$refs.rgtable.bar_table)
-        this.getScatterInfo()
+    activeName: function (val) {
+      if (val === "second") {
+        this.getScatterInfo();
       }
-    }
-      
+      if(val === 'first') {
+        this.getBarInfo();
+      }
+    },
   },
   methods: {
-    getBarInfo(){
+    getBarInfo() {
+      this.subName =  "BarPlot of Genetic Correction (" + this.rgmodel.toUpperCase() + ")";
       this.$refs.rgtable.getTables(this.rgmodel);
     },
-    getScatterInfo(){
-      this.$refs.pairtable.getTables();
+    getScatterInfo() {
+        var table_info = this.$refs.rgtable.bar_table;
+        var target_gwas_ids = [table_info[1]["gwas1_id"]];
+        for (var i of table_info) {
+          target_gwas_ids.push(i["gwas2_id"]);
+        }        
+      this.$refs.pairtable.getTables(target_gwas_ids);
     },
     changeModel() {
       this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
-      this.getBarInfo()
-      this.$refs.rgtable.multiSel = []
+      this.getBarInfo();      
     },
-    changeTrait2Model(){
-      this.getBarInfo()
+    changeTrait2Model() {
+      this.getBarInfo();
     },
     getBarData(data) {
-      this.barPlotData = data
+      this.barPlotData = data;
     },
     getScatterData(data) {
-      this.scatterData = data
+      this.scatterData = data;
     },
-    fig1aset(){
-      this.isSetup = false
-      this.getBarInfo()
-    }
+    fig1aset() {
+      this.isSetup = false;
+      this.getBarInfo();
+    },
   },
 };
 </script>
