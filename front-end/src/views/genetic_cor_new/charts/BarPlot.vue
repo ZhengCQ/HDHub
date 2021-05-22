@@ -13,6 +13,10 @@ export default {
       type: String,
       default: 'chart'
     },
+    subName: {
+      type: String,
+      default: 'Genetic Correlation'
+    },
     width: {
       type: String,
       default: '100%'
@@ -118,9 +122,12 @@ export default {
       this.chart.setOption({
         title: {
           text: this.className,
-          subtext: 'Genetic Correlation',
+          subtext: this.subName,
           textStyle: {
-            fontSize: 32
+            fontSize: 28
+          },
+          subtextStyle:{
+            fontSize: 20
           },
           left: '40%'
         },

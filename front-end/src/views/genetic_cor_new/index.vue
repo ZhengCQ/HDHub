@@ -55,7 +55,8 @@
              <div v-if ="barPlotData">
               <bar-plot
                 :key ="timer"
-                :class-name="traits[0]"
+                :class-name="subName"
+                :subName="traits[0]"
                 :chart-data="barPlotData.data"
                 :col-data="barPlotData.col"
                 :pval-data="barPlotData.pval"
@@ -105,6 +106,7 @@ export default {
       ishdl: true,
       isTop: true,
       rgmodel: "hdl",
+      subName: "Genetic Correction",
       barPlotData: "",
       activeName: 'first',
       isSetup:false,
@@ -125,10 +127,16 @@ export default {
   },
   mounted() {
     this.getInfo()
+    this.subName = this.subName + " (" + this.rgmodel + ")"
+  },
+  watch: {
+      rgmodel: function(val){
+        this.subName = "Genetic Correction (" + val + ")"
+      }
   },
   methods: {
     getInfo(){
-      this.$refs.rgtable.getTables();
+      this.$refs.rgtable.getTables(this.rgmodel);
     },
     changeModel() {
       this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
