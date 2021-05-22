@@ -101,7 +101,7 @@ import SearchTraits from "../genetic_cor/SearchTraits.vue";
 import HeatMap from "./charts/HeatMap";
 import NetGraph from "./charts/NetGraph";
 import PairTable from "./table";
-import SetPara from "../genetic_cor_new/setpara.vue";
+import SetPara from "../genetic_cor/setpara.vue";
 export default {
   components: {
     SearchTraits,

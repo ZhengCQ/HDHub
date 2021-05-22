@@ -31,17 +31,12 @@ export const constantRoutes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/genetic_cor/Home')
+    component: () => import('@/views/home/index')
   },
   {
     path: '/genetic_cor',
     name: 'Genetic_cor',
     component: () => import('@/views/genetic_cor/index')
-  },
-  {
-    path: '/genetic_cor_new',
-    name: 'Genetic_cor_new',
-    component: () => import('@/views/genetic_cor_new/index')
   },
   {
     path: '/netgraph',

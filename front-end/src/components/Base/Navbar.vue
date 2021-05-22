@@ -38,9 +38,6 @@
               <router-link to="/genetic_cor" class="nav-link">Genetic Correlation</router-link>
             </li>
             <li class="nav-item">
-              <router-link to="/genetic_cor_new" class="nav-link">Genetic Correlation New</router-link>
-            </li>
-            <li class="nav-item">
               <router-link to="/netgraph" class="nav-link">NetGraph</router-link>
             </li>
             <li class="nav-item">

@@ -59,6 +59,7 @@ export default {
     return {
       tableData: [],
       multiSel: [],
+      bar_table: [],
       total_items: 0,
       listQuery: {
         page: 1,
@@ -180,12 +181,12 @@ export default {
     },
     getBarPic() {
       this.reset_bar()
-      var bar_table = (this.isTop ? this.tableData: this.multiSel)
-      var sorted_keys_array = Object.keys(bar_table).sort((a, b) => {
-        return bar_table[b].cor - bar_table[a].cor
+      this.bar_table = (this.isTop ? this.tableData: this.multiSel)
+      var sorted_keys_array = Object.keys(this.bar_table).sort((a, b) => {
+        return this.bar_table[b].cor - this.bar_table[a].cor
       })
       sorted_keys_array.forEach((v, idx) => {
-        var val = bar_table[v]
+        var val = this.bar_table[v]
         this.barPlotData.data.push(val.cor)
         this.barPlotData.col.push(val.trait2)
         this.barPlotData.pval.push(val.p)

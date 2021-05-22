@@ -78,7 +78,7 @@
 <script>
 import SearchTraits from "../genetic_cor/SearchTraits.vue";
 import PairTable from "./table";
-import SetPara from "../genetic_cor_new/setpara.vue";
+import SetPara from "../genetic_cor/setpara.vue";
 import ErrorPairScatter from './charts/ErrorPairScatter.vue'
 export default {
   components: {
