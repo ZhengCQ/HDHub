@@ -2,7 +2,7 @@
   <div>
         <!--页码 开始-->
     <pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size" @pagination="getTables({rgModel})" />
+      :limit.sync="listQuery.page_size" @pagination="getTables(model)" />
     <!--页码 结束-->
     <!--表格 开始-->
     <el-table ref="traitsPairTable" 
@@ -47,7 +47,7 @@ export default {
       type: Array,
     },
     rgModel: {
-      type: String
+      type:String,
     },
     filterInfo:{
       type: Object
@@ -67,6 +67,7 @@ export default {
         page_size: 10,
         sort: "+id",
       },
+      model:this.rgModel,
       barPlotData:{
         data: [],
         col: [],
@@ -149,6 +150,7 @@ export default {
       }
     },
     rgModel:function(val) {
+      this.model = val
       this.$refs.traitsPairTable.clearSelection()
     }
   },
@@ -158,15 +160,15 @@ export default {
     },
     handleSelectionChange(val) {
       this.multiSel = val
-      console.log(this.multiSel)
     },
-    getTables(rgModel) {
+    getTables(model_in) {
+      console.log(model_in)
       postPairCor({
         value: this.gwasIds,
         query: this.listQuery,
         filter: this.filterInfo,
         activeName: this.activeName,
-      },rgModel).then((res) => {
+      },model_in).then((res) => {
         this.total_items = res.data._meta.total_items;
         this.tableData = res.data.items;
         this.getBarPic()

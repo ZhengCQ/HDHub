@@ -141,7 +141,6 @@ def query_hdl_ldsc_geneticcor():
     starttime = datetime.datetime.now()
     gwas1 = value[0]
     gwas2 = value[1:]
-
     hdl_data = Genetic_Cor_HDL().to_collection_dict(
         Genetic_Cor_HDL().query.filter(
                         and_(or_(
@@ -154,6 +153,7 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_HDL.cor.desc()),\
                 page, page_size)
+    
     if len(hdl_data['items'])>1:
         hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
         df_hdl = pd.DataFrame(hdl_data['items'])
@@ -186,7 +186,8 @@ def query_hdl_ldsc_geneticcor():
         return jsonify({'code': 400, 'message': 'There are not any value in LDSC database with current filtering'})  
 
     df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
-    items = df_m.head(page_size).reset_index().to_dict('records')
+    print(df_ldsc.shape,df_hdl.shape,df_m.shape)
+    items = df_m.reset_index().to_dict('records')
     total_items = df_m.shape[0]
     df_plot  = pd.DataFrame()
     df_plot['trait'] = df_m['trait1_x'] + '_vs_' + df_m['trait2_x']
