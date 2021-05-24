@@ -25,8 +25,10 @@
     data() {
       return {
         chart: null,
-        max_y: 1,
-        max_x: 1, 
+        max_y: 0,
+        max_x: 0,
+        min_x: 0,
+        min_y: 0,
         dimensions:[
             'name', 'HDL', 'LDSC', 'LDSC  min', 'LDSC max', 'HDL min', 'HDL max'
         ]
@@ -36,19 +38,10 @@
       chartData: {
         deep: true,
         handler(val) {
-          
           this.setOptions(val)
-          
-          if (val.length > 10) {
-            this.autoHeight = val.length * 25 + 50
             this.chart.resize({
-              height: this.autoHeight
+              height: 550
             })
-          } else {
-            this.chart.resize({
-              height: 350
-            })
-          }
         }
       }
     },
@@ -66,7 +59,6 @@
     },
     methods: {
       get_axis_xy(data) {
-        console.log(data)
         for (var i of data) {
           if (i[6] > this.max_y) {
             this.max_y = i[6].toFixed(1)
@@ -74,11 +66,23 @@
           if (i[4] > this.max_x) {
             this.max_x = i[4].toFixed(1)
           }
+          if (i[5] < this.min_y) {
+            this.min_y = i[5].toFixed(1)
+          }
+          if (i[3] > this.mix_x) {
+            this.mix_x = i[3].toFixed(1)
+          }
         }
         if (this.max_y > this.max_x) {
           this.max_x = this.max_y
         } else {
           this.max_y = this.max_x
+        }
+
+        if (this.min_y < this.min_x) {
+          this.min_x = this.min_y
+        } else {
+          this.min_y = this.min_x
         }
       },
       initChart() {
@@ -176,11 +180,15 @@
           },
           xAxis: {
             name: 'LDSC',
-            max: this.max_x
+            min: this.min_x,
+            max: this.max_x,
+            axisLine: { onZero: false }
           },
           yAxis: {
             name: 'HDL',
-            max: this.max_y
+            min:this.min_y,
+            max: this.max_y,
+            axisLine: { onZero: false }
           },
           series: [{
               type: 'scatter',
@@ -214,7 +222,7 @@
             {
               name: '对角线',
               type: 'line',
-              data: [0, this.max_y]
+              data: [this.min_y, this.max_y]
             }
           ]
         })

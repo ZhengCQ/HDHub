@@ -4,46 +4,72 @@
       width="250px"
       style="background-color: rgb(238, 241, 246); padding-top: 50px"
     >
-      <div style="text-align: center">
-        <el-switch
-          style="display: block"
-          v-model="ishdl"
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          active-text="HDL"
-          inactive-text="LDSC"
-          @change="changeModel"
-        >
-        </el-switch>
-      </div>
-
-      <div class="summit-form">
-        <h5>Trait1</h5>
-        <search-traits :sel_traits="traits"></search-traits>
-      </div>
-      <div>
-        <h5>Trait2</h5>
-        <div style="text-align: center">
-          <el-switch
-            style="display: block"
-            v-model="isTop"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="Top"
-            inactive-text="Optional"
-            @change="changeTrait2Model"
+      <el-menu
+        :default-openeds="['1', '2', '3']"
+        :default-active="this.$route.path"
+        router
+      >
+        <el-submenu index="1">
+          <template slot="title"
+            ><i class="el-icon-setting"></i>Methods Selection</template
           >
-          </el-switch>
-        </div>
-      </div>
+          <div style="text-align: center">
+            <el-switch
+              style="display: block"
+              v-model="ishdl"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              active-text="HDL"
+              inactive-text="LDSC"
+              :disabled="true"
+            >
+            </el-switch>
+          </div>
+        </el-submenu>
+
+        <el-submenu index="2">
+          <template slot="title"
+            ><i class="el-icon-message"></i>Traits Information</template
+          >
+
+          <el-menu-item-group>
+            <template slot="title">Trait1</template>
+            <div style="text-align: center">
+              <p>{{ traits[0] }}</p>
+            </div>
+          </el-menu-item-group>
+
+          <el-menu-item-group>
+            <template slot="title">Trait2</template>
+            <div style="text-align: center">
+              <el-switch
+                style="display: block"
+                v-model="isTop"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                active-text="Top"
+                inactive-text="Optional"
+                :disabled="true"
+              >
+              </el-switch>
+            </div>
+          </el-menu-item-group>
+        </el-submenu>
+        <el-submenu index="3">
+          <template slot="title"
+            ><i class="el-icon-menu"></i>Further Exploring</template
+          >
+          <el-menu-item index="/">Back Home to Reselect</el-menu-item>
+          <el-menu-item index="/genetic_cor">BarPlot</el-menu-item>
+          <el-menu-item @click="activeName = 'second'"
+            >Scatter of HDL VS LDSC</el-menu-item
+          >
+          <el-menu-item index="/netgraph">NetGraph</el-menu-item>
+        </el-submenu>
+      </el-menu>
     </el-aside>
 
     <el-container>
-      <set-para
-        @fig1asetDialog="fig1aset"
-        :isSetup="isSetup"
-        :FormInfo="setParaInfo"
-      ></set-para>
       <el-header>
         <div style="text-align: left; font-size: 16px">
           <i
@@ -56,97 +82,100 @@
       </el-header>
 
       <el-main>
-            <div v-if ="scatterData">
-              <error-pair-scatter
-                :key ="timer"
-                :class-name="traits[0]"
-                :chart-data="scatterData"
-              />
-             </div>
-        <pair-table
-          @ScatterPlotData="getPlotData"
-          :gwasIds="gwas_ids"
-          :rgModel="rgmodel"
-          :filterInfo="setParaInfo"
-          ref="pairtable"
-        >
-        </pair-table>
+        <div v-show="scatterData">
+          <error-pair-scatter
+            :key="timer"
+            :class-name="traits[0]"
+            :chart-data="scatterData"
+          />
+
+          <pair-table
+            @ScatterPlotData="getScatterData"
+            :filterInfo="setParaInfo"
+            ref="pairtable"
+          >
+          </pair-table>
+        </div>
       </el-main>
     </el-container>
   </el-container>
 </template>
+
+
 <script>
-import SearchTraits from "../genetic_cor/SearchTraits.vue";
-import PairTable from "./table";
-import SetPara from "../genetic_cor/setpara.vue";
-import ErrorPairScatter from './charts/ErrorPairScatter.vue'
+import SetPara from "./setpara.vue";
+import PairTable from "./table.vue";
+import ErrorPairScatter from "./charts/ErrorPairScatter";
+
 export default {
+  name: "Genetic_cor",
   components: {
-    SearchTraits,
-    PairTable,
     SetPara,
-    ErrorPairScatter
+    PairTable,
+    ErrorPairScatter,
   },
   data() {
     return {
       timer: "",
-      traits: "",
-      activeName: "first",
-      gwas_ids: [],
-      gwas1_ids: [],
-      gwas2_ids: [],
-      heatMapData: [],
-      colHeatMapData: [],
-      netNodes: [],
-      netLinks: [],
-      netCategories: [],
-      ishdl: "",
-      rgmodel: "hdl",
-      isTop: true,
       traits: [],
+      gwas_ids: [],
+      target_gwas_ids: [],
+      ishdl: true,
+      isTop: true,
+      rgmodel: "hdl",
+      subName: "Genetic Correction",
+      scatterData: "",
       isSetup: false,
       setParaInfo: {
         p_cor: [0.2, 1.2],
         n_cor: [-1.2, -0.2],
         p_cutoff: 0.05,
       },
-      scatterData: ''
     };
   },
   created() {
-    this.gwas1_ids = [11];
-    this.gwas2_ids = [625, 617, 632, 745, 27, 60, 579, 606, 151, 568];
-    // this.gwas_ids.push(this.gwas1_ids)
-    for (var i of this.gwas1_ids){
-      this.gwas_ids.push(i)
+    if (this.$route.params.gwas) {
+      this.gwas_ids = this.$route.params.gwas;
+      this.traits = this.$route.params.traits;
+      this.target_gwas_ids = this.$route.params.target_gwas_ids;
     }
-    for(var i of this.gwas2_ids){
-      this.gwas_ids.push(i)
+    if (this.gwas_ids.length == 0) {
+      this.gwas_ids = [11];
+      this.traits = ["Type 2 Diabetes"];
+      this.target_gwas_ids = [
+        11,
+        625,
+        617,
+        632,
+        745,
+        27,
+        60,
+        579,
+        606,
+        151,
+        568,
+      ];
     }
-    console.log(this.gwas_ids)
-    this.traits = ["Type 2 Diabetes"];
   },
   mounted() {
-    this.getInfo();
+    this.getScatterInfo();
+  },
+  watch: {
+    activeName: function (val) {
+      if (val === "second") {
+        this.getScatterInfo();
+      }
+      if (val === "first") {
+        this.getBarInfo();
+      }
+    },
   },
   methods: {
-    getInfo() {
-      this.$refs.pairtable.getTables();
+    getScatterInfo() {
+      this.$refs.pairtable.getTables(this.target_gwas_ids);
     },
-    changeModel() {
-      this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
-      this.getInfo();
-      this.$refs.rgtable.multiSel = [];
-    },
-    changeTrait2Model() {
-      this.getInfo();
-    },
-    fig1aset() {
-      this.isSetup = false;
-      this.getInfo();
-    },
-    getPlotData(data) {
-      this.scatterData = data
+    getScatterData(data) {
+      this.scatterData = data;
     },
   },
 };
@@ -163,18 +192,7 @@ export default {
   color: #333;
 }
 
-.el-select {
-  position: relative;
-  font-size: 14px;
-  display: inline-block;
-  width: 10%;
-}
-
-.summit-form {
-  padding-top: 20px;
-  position: relative;
-  max-width: 95%;
-  margin: 0 auto;
-  overflow: hidden;
+/deep/ .el-submenu__title {
+  font-size: 18px;
 }
 </style>

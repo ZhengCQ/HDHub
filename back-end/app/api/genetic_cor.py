@@ -99,7 +99,8 @@ def query_detail(id):
 def query_cycle_geneticcor():
     data = request.get_json()
     query = data['query']
-    gwaslst = data['value'][0]
+    gwaslst = data['value']
+    print(gwaslst)
     filter_cut = data['filter']
     ### values from front
     page = query['page']
@@ -131,12 +132,12 @@ def query_cycle_geneticcor():
 @bp.route('/hdl_ldscPairCor', methods=['POST'])
 def query_hdl_ldsc_geneticcor():
     data = request.get_json()
-    query = data['query']
+    #query = data['query']
     value = data['value']
     filter_cut = data['filter']
     ### values from front
-    page = query['page']
-    page_size = query['page_size']
+    #page = query['page']
+    #page_size = query['page_size']
     ### Trait1 info
     starttime = datetime.datetime.now()
     gwas1 = value[0]
@@ -152,7 +153,7 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
                             and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_HDL.cor.desc()),\
-                page, page_size)
+                1, len(gwas2))
     
     if len(hdl_data['items'])>1:
         hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
@@ -174,7 +175,7 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
                             and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_LDSC.rg.desc()),\
-                page, page_size)
+                1, len(gwas2))
     
     if len(ldsc_data['items'])>1:
         ldsc_data['items'] = trans_order_table(gwas1,ldsc_data['items'])
@@ -186,7 +187,6 @@ def query_hdl_ldsc_geneticcor():
         return jsonify({'code': 400, 'message': 'There are not any value in LDSC database with current filtering'})  
 
     df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
-    print(df_ldsc.shape,df_hdl.shape,df_m.shape)
     items = df_m.reset_index().to_dict('records')
     total_items = df_m.shape[0]
     df_plot  = pd.DataFrame()
@@ -199,11 +199,6 @@ def query_hdl_ldsc_geneticcor():
     df_plot.loc[:,'cor_HDL_max'] = df_plot['cor_HDL']+df_m['cor_se_HDL']*1.96
         
     data_plot = df_plot.to_dict('split')['data']
-    #'id_HDL', 'trait1_x', 'trait2_x', 'h1_HDL', 'h1_se_HDL', 'h2_HDL',
-    #   'h2_se_HDL', 'cov_HDL', 'cov_se_HDL', 'cor_HDL', 'cor_se_HDL', 'p_HDL',
-    #   'id_LDSC', 'trait1_y', 'trait2_y', 'h1_LDSC', 'h1_se_LDSC', 'h2_LDSC',
-    #   'h2_se_LDSC', 'cov_LDSC', 'cov_se_LDSC', 'cor_LDSC', 'cor_se_LDSC',
-    #   'p_LDSC'
 
     return jsonify({'code': 200, 'data':{'items':items,'total_items':total_items, 'data_plot': data_plot}})
 

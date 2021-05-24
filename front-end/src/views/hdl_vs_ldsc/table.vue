@@ -1,6 +1,12 @@
 <template>
   <div>
+    <!--页码 开始-->
+    <!--pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
+      :limit.sync="listQuery.page_size" @pagination="getTables(target_gwas_ids)" /--!>
+    <!--页码 结束-->
+
     <!--表格 开始-->
+
     <el-table ref="traitsPairTable" :data="tableDataParis" border fit highlight-current-row style="width: 100%;"
       align="center">
       </el-table-column>
@@ -13,11 +19,6 @@
       <slot />
     </el-table>
     <!--表格 结束-->
-    <!--页码 开始-->
-
-    <pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size" @pagination="getCyclePairsTables()" />
-    <!--页码 结束-->
   </div>
 </template>
 
@@ -29,12 +30,6 @@ export default {
     Pagination,
   },
   props: {
-    gwasIds: {
-      type: Array,
-    },
-    rgModel: {
-      type: String
-    },
     filterInfo:{
       type: Object
     }
@@ -47,6 +42,7 @@ export default {
         page_size: 10,
         sort: "+id",
       },
+      target_gwas_ids:[],
       tableDataParis: [],
       tableKey: [
         {
@@ -113,10 +109,10 @@ export default {
     };
   },
   methods: {
-    getTables() {
-      console.log(this.gwasIds)
+    getTables(target_gwas_ids) {
+      this.target_gwas_ids = target_gwas_ids
       postHdlLdscPairCor({
-        value: this.gwasIds,
+        value: target_gwas_ids,
         query: this.listQuery,
         filter: this.filterInfo
       }).then((res) => {

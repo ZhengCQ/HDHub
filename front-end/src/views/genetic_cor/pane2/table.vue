@@ -1,11 +1,12 @@
 <template>
   <div>
     <!--页码 开始-->
-    <pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size" @pagination="getTables(target_gwas_ids)" />
+    <!--pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
+      :limit.sync="listQuery.page_size" @pagination="getTables(target_gwas_ids)" /--!>
     <!--页码 结束-->
 
     <!--表格 开始-->
+
     <el-table ref="traitsPairTable" :data="tableDataParis" border fit highlight-current-row style="width: 100%;"
       align="center">
       </el-table-column>
@@ -41,7 +42,6 @@ export default {
         page_size: 10,
         sort: "+id",
       },
-      target_gwas_ids:[],
       tableDataParis: [],
       tableKey: [
         {
@@ -109,7 +109,6 @@ export default {
   },
   methods: {
     getTables(target_gwas_ids) {
-      this.target_gwas_ids = target_gwas_ids
       postHdlLdscPairCor({
         value: target_gwas_ids,
         query: this.listQuery,
