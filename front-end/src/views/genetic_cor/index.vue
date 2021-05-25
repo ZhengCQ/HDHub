@@ -32,7 +32,8 @@
           <template slot="title"
             ><i class="el-icon-message"></i>Traits Information</template
           >
-          <el-menu-item index="/">Back Home to Reselect</el-menu-item>
+
+          <el-menu-item index="/"><i class="el-icon-back"></i> Back Home to Reselect</el-menu-item>
 
           <el-menu-item-group>
             <template slot="title">Trait1</template>
@@ -93,7 +94,7 @@
             class="el-icon-setting el-icon--left"
             style="margin-right: 15px"
             @click="isSetup = true"
-            >数据设置</i
+            >Setup</i
           >
         </div>
       </el-header>
@@ -150,7 +151,7 @@
             <div v-if="iswaiting" style="padding-top: 20px" align="center">
               <p>
                 Your job is running.....</br>
-                It may take 3-8 seconds for each 10 input items.</br>
+                It may take 3-8 seconds for input items(limit to 20 items).</br>
                 Please waiting the results patiently!!!
               </p>
             </div>

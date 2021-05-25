@@ -23,7 +23,7 @@
 
 <script>
 import Pagination from "@/components/Pagination";
-import { postCyclePairCor } from '@/api/genetic_cor'
+import { postHdlLdscPairCor } from '@/api/genetic_cor'
 export default {
   components: {
     Pagination,
@@ -39,12 +39,6 @@ export default {
       type: Object
     }
   },
-  watch: {
-    tableDataParis: function(val){
-      console.log(val)
-      this.$emit("PlotData",this.resultsInfo);
-    }
-  },
   data() {
     return {
       total_items: 0,
@@ -52,90 +46,85 @@ export default {
         page: 1,
         page_size: 10,
         sort: "+id",
-        resultsInfo: ''
       },
       tableDataParis: [],
       tableKey: [
         {
-          name: "trait1",
+          name: "trait1_x",
           label: "Trait1",
-          prop: "trait1",
+          prop: "trait1_x",
         },
         {
-          name: "trait2",
+          name: "trait2_x",
           label: "Trait2",
-          prop: "trait2",
+          prop: "trait2_x",
         },
         {
-          name: "cor",
-          label: "Correlation",
-          prop: "cor",
+          name: "cor_HDL",
+          label: "Correlation_HDL",
+          prop: "cor_HDL",
         },
         {
-          name: "cor_se",
-          label: "Correlation_SE",
-          prop: "cor_se",
+          name: "cor_se_HDL",
+          label: "Correlation_SE_HDL",
+          prop: "cor_se_HDL",
         },
         {
-          name: "p",
-          label: "p",
-          prop: "p",
+          name: "p_HDL",
+          label: "p_HDL",
+          prop: "p_HDL",
         },
         {
-          name: "cov",
-          label: "Covariance",
-          prop: "cov",
+          name: "cov_HDL",
+          label: "Covariance_HDL",
+          prop: "cov_HDL",
         },
         {
-          name: "cov_se",
-          label: "Covariance_SE",
-          prop: "cov_se",
+          name: "cov_se_HDL",
+          label: "Covariance_SE_HDL",
+          prop: "cov_se_HDL",
         },
         {
-          name: "gwas1",
-          label: "gwas1",
-          prop: "gwas1",
+          name: "cor_LDSC",
+          label: "Correlation_LDSC",
+          prop: "cor_LDSC",
         },
         {
-          name: "gwas2",
-          label: "gwas2",
-          prop: "gwas2",
+          name: "cor_se_LDSC",
+          label: "Correlation_SE_LDSC",
+          prop: "cor_se_LDSC",
         },
         {
-          name: "h1",
-          label: "h1",
-          prop: "h1",
+          name: "p_LDSC",
+          label: "p_LDSC",
+          prop: "p_LDSC",
         },
         {
-          name: "h1_se",
-          label: "h1_se",
-          prop: "h1_se",
+          name: "cov_LDSC",
+          label: "Covariance_LDSC",
+          prop: "cov_LDSC",
         },
         {
-          name: "h2",
-          label: "h2",
-          prop: "h2",
-        },
-        {
-          name: "h2_se",
-          label: "h2_se",
-          prop: "h2_se",
-        },
+          name: "cov_se_LDSC",
+          label: "Covariance_SE_LDSC",
+          prop: "cov_se_LDSC",
+        }
       ],
     };
   },
   methods: {
-    async getTables(target_gwas_ids) {
-      var res = await  postCyclePairCor({
-        value: target_gwas_ids,
+    getTables() {
+      console.log(this.gwasIds)
+      postHdlLdscPairCor({
+        value: this.gwasIds,
         query: this.listQuery,
         filter: this.filterInfo
-      })
-      console.log('yess')
-        this.total_items = res.data._meta.total_items
+      }).then((res) => {
+        this.total_items = res.data.total_items
         this.tableDataParis = res.data.items
-        this.tableDataParis_allids = res.qy_ids
-        this.resultsInfo = res
+        this.dataPlot = res.data.data_plot
+        this.$emit("ScatterPlotData",this.dataPlot);
+      })
     },
   }
 };

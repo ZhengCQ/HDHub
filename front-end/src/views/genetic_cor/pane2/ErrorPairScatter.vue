@@ -163,9 +163,15 @@
         this.get_axis_xy(data),
         this.chart.setOption({
           title: {
-            text: this.className,
-            subtext: 'Genetic Correlation(HDL vs LDSC)',
-            left: '40%'
+            text: 'PairScatter of Genetic Correlation(HDL vs LDSC)',
+            subtext: this.className,
+            left: '25%',
+          textStyle: {
+            fontSize: 26
+          },
+          subtextStyle:{
+            fontSize: 18
+          },
           },
           tooltip: {},
           toolbox: {
@@ -176,7 +182,8 @@
           }
         },
           grid: {
-            bottom: 80
+            top: 80,
+            bottom: 80,
           },
           xAxis: {
             name: 'LDSC',

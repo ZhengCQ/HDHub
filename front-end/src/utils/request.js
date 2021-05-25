@@ -7,8 +7,13 @@ import { getToken } from '@/utils/auth'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  timeout: 10000, // request timeout
 })
+
+// 请求超时从新请求次数，请求间隙
+axios.defaults.retry = 1
+axios.defaults.retryDelay = 1000
+
 
 // request interceptor
 service.interceptors.request.use(
@@ -71,7 +76,31 @@ service.interceptors.response.use(
       return res
     }
   },
-  error => {
+  err => { // 请求超时，设置从新请求及错误提示
+    let config = err.config
+    if (!config || !config.retry) {
+      Message.error((err && err.data && err.data.msg) || '接口异常')
+      return Promise.reject(err)
+    }
+    // 设置请求超时次数
+    config.__retryCount = config.__retryCount || 0
+    if (config.__retryCount >= config.retry) {
+      Message.error((err && err.data && err.data.msg) || '接口异常')
+      return Promise.reject(err)
+    }
+    config.__retryCount += 1
+    let backoff = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, config.retryDelay || 1)
+    })
+    console.log(config)
+    return backoff.then(() => {
+      return service(config)
+    })
+  }
+  
+  /*{
     console.log('err' + error) // for debug
     Message({
       message: error.message,
@@ -79,7 +108,7 @@ service.interceptors.response.use(
       duration: 5 * 1000
     })
     return Promise.reject(error)
-  }
+  }*/
 )
 
 export default service

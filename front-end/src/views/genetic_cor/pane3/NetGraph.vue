@@ -64,16 +64,25 @@ export default {
         height: 800
       })
       this.setOptions(this.nodes, this.links, this.categories)
+      console.log(this.nodes,this.links,this.categories)
     },
+
     setOptions(nodes, links, categories) {
       this.chart.setOption({
         title: {
-          text: this.className,
-          subtext: 'Circular layout',
-          textStyle: {
-            fontSize: 32
+          text: 'Circular layout',
+          subtext: this.className,
+          left: '20%',
+                    textStyle: {
+            fontSize: 26
           },
-          left: '10%'
+          subtextStyle:{
+            fontSize: 18
+          },
+        },
+        grid: {
+          top: '40%',
+          bottom: '10%'
         },
         tooltip: {},
         legend: [{

@@ -100,7 +100,8 @@ def query_cycle_geneticcor():
     data = request.get_json()
     query = data['query']
     gwaslst = data['value']
-    print(gwaslst)
+    #### top20
+    gwaslst = gwaslst[0:20]
     filter_cut = data['filter']
     ### values from front
     page = query['page']

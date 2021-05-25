@@ -69,15 +69,18 @@ export default {
     setOptions(seriesData, xData, yData) {
       this.chart.setOption({
         title: {
-          text: this.className,
-          subtext: 'HeatMap',
-          textStyle: {
-            fontSize: 32
+          text: 'HeatMap',
+          subtext: this.className,
+                    textStyle: {
+            fontSize: 26
           },
-          left: '40%'
+          subtextStyle:{
+            fontSize: 18
+          },
+          left: '50%'
         },
         grid: {
-          top: '10%',
+          top: '12%',
           left: '30%',
           right: '10%',
           bottom: '40%'

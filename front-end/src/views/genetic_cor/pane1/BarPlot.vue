@@ -129,7 +129,7 @@ export default {
           subtextStyle:{
             fontSize: 18
           },
-          left: '40%'
+          left: '35%'
         },
         tooltip: {
           trigger: 'axis',
