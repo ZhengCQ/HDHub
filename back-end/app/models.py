@@ -16,59 +16,39 @@ class PaginatedAPIMixin(object):
             }
         }
         return data
-"""
-gwaspairs2cor = db.Table('gwaspairs2cor',
-                       db.Column('Trait1_id',db.Integer,db.ForeignKey("gwas2traits.id")),
-                       db.Column('Trait2_id',db.Integer,db.ForeignKey("gwas2traits2.id")),
-                       db.Column('Cor_id',db.Integer,db.ForeignKey("genetic_cor.id"))
-                       )
-"""
-"""
-class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
-    __tablename__ = 'gwaspairs2cor'
-    __table_args__ = {"extend_existing": True}
-    id = db.Column(db.Integer, primary_key=True)
-    Trait1_id = db.Column(db.Integer,db.ForeignKey("gwas2traits.id"))
-    Trait2_id = db.Column(db.Integer,db.ForeignKey("gwas2traits2.id"))
-    Cor_id = db.Column(db.Integer,db.ForeignKey("genetic_cor.id"))
-    Cor_id = db.Column(db.Integer,db.ForeignKey("genetic_cor.id"))
-    trait1 = db.relationship('GWAS2Traits')
-    trait2 = db.relationship('GWAS2Traits2')
-    cor = db.relationship('Genetic_Cor')
-    
-    def to_dict(self):
+
+    def to_collection_dict_model(query, page, per_page, model, **kwargs):
+        # 如果当前没有任何资源时，或者前端请求的 page 越界时，都会抛出 404 错误
+        # 由 @bp.app_errorhandler(404) 自动处理，即响应 JSON 数据：{ error: "Not Found" }
+        resources = query.paginate(page, per_page)
         data = {
-            'id': self.id,
-            'gwas1_id':self.trait1.id,
-            'gwas2_id':self.trait2.id,
-            'trait1':self.trait1.Trait,
-            'trait2':self.trait2.Trait,
-            'gwas1': self.trait1.Filename,
-            'gwas2': self.trait2.Filename,
-            'cov': self.cor.cov,
-            'cov_se': self.cor.cov_se,
-            'cor': self.cor.cor,
-            'cor_se': self.cor.cor_se,
-            'p': self.cor.p
+            'items': [item.to_dict(model) for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            }
         }
         return data
 
-"""
 class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
     __tablename__ = 'gwaspairs2cor_all'
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     Trait1_id = db.Column(db.Integer,db.ForeignKey("gwas2traits.id"))
     Trait2_id = db.Column(db.Integer,db.ForeignKey("gwas2traits2.id"))
-    Cor_id_hdl = db.Column(db.Integer,db.ForeignKey("genetic_cor_hdl.id"))
-    Cor_id_ldsc = db.Column(db.Integer,db.ForeignKey("genetic_cor_ldsc.id"))
+    hdl_id = db.Column(db.Integer)
+    ldsc_id = db.Column(db.Integer)
+    hdl_id = db.Column(db.Integer,db.ForeignKey("genetic_cor_hdl.id"))
+    ldsc_id = db.Column(db.Integer,db.ForeignKey("genetic_cor_ldsc.id"))
 
     trait1 = db.relationship('GWAS2Traits')
     trait2 = db.relationship('GWAS2Traits2')
     cor_hdl = db.relationship('Genetic_Cor_HDL')
     cor_ldsc = db.relationship('Genetic_Cor_LDSC')
     
-    def to_dict(self):
+    def to_dict(self,model):
         data = {
             'id': self.id,
             'gwas1_id':self.trait1.id,
@@ -77,15 +57,15 @@ class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
             'trait2':self.trait2.Trait,
             'gwas1': self.trait1.Filename,
             'gwas2': self.trait2.Filename,
-            'cov': self.cor_hdl.cov,
-            'cov_se': self.cor_hdl.cov_se,
-            'cor': self.cor_hdl.cor,
-            'cor_se': self.cor_hdl.cor_se,
-            'p': self.cor_hdl.p,
-            'h1':self.cor_hdl.h1,
-            'h1_se':self.cor_hdl.h1_se,
-            'h2':self.cor_hdl.h2,
-            'h2_se':self.cor_hdl.h2_se,
+            'cov': self.cor_hdl.cov if model == 'hdl' else self.cor_ldsc.gcov_int,
+            'cov_se': self.cor_hdl.cov_se if model == 'hdl' else self.cor_ldsc.gcov_int_se,
+            'cor': self.cor_hdl.cor if model == 'hdl' else self.cor_ldsc.rg,
+            'cor_se': self.cor_hdl.cor_se if model == 'hdl' else self.cor_ldsc.se,
+            'p': self.cor_hdl.p if model == 'hdl' else self.cor_ldsc.p,
+            'h1':self.cor_hdl.h1 if model == 'hdl' else self.cor_ldsc.h2_obs_p1,
+            'h1_se':self.cor_hdl.h1_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p1,
+            'h2':self.cor_hdl.h2 if model == 'hdl' else self.cor_ldsc.h2_obs_p2,
+            'h2_se':self.cor_hdl.h2_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p2,
         }
         return data
 
@@ -123,39 +103,6 @@ class GWAS2Traits(db.Model):
             'sampel_size': self.Sample_size
         }
         return data
-
-"""
-class Genetic_Cor(PaginatedAPIMixin,db.Model):
-    __tablename__ = 'genetic_cor'
-    id    = db.Column(db.Integer, primary_key=True)
-    gwas1 = db.Column(db.Integer)
-    gwas2 = db.Column(db.Integer)
-    cov   = db.Column(db.REAL)
-    cov_se = db.Column(db.REAL)
-    cor   = db.Column(db.REAL)
-    cor_se = db.Column(db.REAL)
-    p = db.Column(db.REAL)
-    pairs = db.relationship('Gwaspairs2cor', lazy='dynamic')
-
-    def to_dict(self):
-        gwas1_info = self.pairs.first().trait1
-        gwas2_info = self.pairs.first().trait2
-        data = {
-            'id': self.id,
-            'gwas1_id':gwas1_info.id,
-            'gwas2_id':gwas2_info.id,
-            'trait1':gwas1_info.Trait,
-            'trait2':gwas2_info.Trait,
-            'gwas1': gwas1_info.Filename,
-            'gwas2': gwas2_info.Filename,
-            'cov': self.cov,
-            'cov_se': self.cov_se,
-            'cor': self.cor,
-            'cor_se': self.cor_se,
-            'p': self.p
-        }
-        return data
-"""
 
 
 class Genetic_Cor_HDL(PaginatedAPIMixin,db.Model):

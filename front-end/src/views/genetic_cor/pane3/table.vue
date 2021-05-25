@@ -125,12 +125,13 @@ export default {
     };
   },
   methods: {
-    async getTables(target_gwas_ids) {
+    async getTables(target_gwas_ids,model) {
+      console.log(target_gwas_ids)
       var res = await  postCyclePairCor({
         value: target_gwas_ids,
         query: this.listQuery,
         filter: this.filterInfo
-      })
+      },model)
       console.log('yess')
         this.total_items = res.data._meta.total_items
         this.tableDataParis = res.data.items

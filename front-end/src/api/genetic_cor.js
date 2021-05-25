@@ -24,9 +24,9 @@ export function postPairCor(data,model) {
     })
   }
 
-  export function postCyclePairCor(data) {
+  export function postCyclePairCor(data,model) {
     return request({
-      url: `/api/cycle_pair_genetic_cor`,
+      url: `/api/cycle_pair_genetic_cor/${model}`,
       method: 'post',
       data
     })

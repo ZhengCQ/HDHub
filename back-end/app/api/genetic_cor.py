@@ -95,8 +95,8 @@ def query_detail(id):
     return jsonify({'code': 200})
 
 
-@bp.route('/cycle_pair_genetic_cor', methods=['POST'])
-def query_cycle_geneticcor():
+@bp.route('/cycle_pair_genetic_cor/<rgmodel>', methods=['POST'])
+def query_cycle_geneticcor(rgmodel):
     data = request.get_json()
     query = data['query']
     gwaslst = data['value']
@@ -107,21 +107,33 @@ def query_cycle_geneticcor():
     page = query['page']
     page_size = query['page_size']
     starttime = datetime.datetime.now()
-    info_query = Gwaspairs2cor.query.filter(
-        and_(Gwaspairs2cor.Trait1_id.in_(gwaslst),
-             Gwaspairs2cor.Trait2_id.in_(gwaslst)
-            )
-        ).outerjoin(Genetic_Cor_HDL).filter(
-                      and_(
-                          Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
-                        or_(
-                            and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
-                            and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1])) 
-                     )).order_by(Gwaspairs2cor.Trait1_id.desc())
-
-    outdata = Gwaspairs2cor.to_collection_dict(info_query,page, page_size)
-
-    df = pd.DataFrame([i.to_dict() for i in info_query.all()])[['trait1','trait2','cor']]
+    if rgmodel == 'hdl':
+        info_query = Gwaspairs2cor.query.filter(
+            and_(Gwaspairs2cor.Trait1_id.in_(gwaslst),
+                Gwaspairs2cor.Trait2_id.in_(gwaslst)
+                )
+            ).outerjoin(Genetic_Cor_HDL).filter(
+                        and_(
+                            Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1])) 
+                        )).order_by(Gwaspairs2cor.Trait1_id.desc())
+    else:
+        info_query = Gwaspairs2cor.query.filter(
+            and_(Gwaspairs2cor.Trait1_id.in_(gwaslst),
+                Gwaspairs2cor.Trait2_id.in_(gwaslst)
+                )
+            ).outerjoin(Genetic_Cor_LDSC).filter(
+                        and_(
+                            Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1])) 
+                        )).order_by(Gwaspairs2cor.Trait1_id.desc())  
+    outdata = Gwaspairs2cor.to_collection_dict_model(info_query,page, page_size, rgmodel)
+    
+    df = pd.DataFrame([i.to_dict(rgmodel) for i in info_query.all()])[['trait1','trait2','cor']]
     hData,hcol = pre_heatmap(df)
     nodes,links = pre_network(df)
 

@@ -11,8 +11,8 @@ const service = axios.create({
 })
 
 // 请求超时从新请求次数，请求间隙
-axios.defaults.retry = 1
-axios.defaults.retryDelay = 1000
+// axios.defaults.retry = 0
+// axios.defaults.retryDelay = 1000
 
 
 // request interceptor

@@ -2,7 +2,7 @@
   <el-container style="border: 1px solid #eee; padding-top: 55px">
     <el-aside
       width="250px"
-      style="background-color: rgb(238, 241, 246); padding-top: 50px"
+      style="background-color: rgb(238, 241, 246); padding-top: 60px"
     >
       <el-menu
         :default-openeds="['1', '2', '3']"
@@ -308,11 +308,11 @@ export default {
       }
     },
     resetNet() {
-      (this.heatMapData = []),
-        (this.colHeatMapData = []),
-        (this.netNodes = []),
-        (this.netLinks = []),
-        (this.netCategories = []);
+        this.heatMapData = [],
+        this.colHeatMapData = [],
+        this.netNodes = [],
+        this.netLinks = [],
+        this.netCategories = [];
     },
     getNetInfo() {
       this.timer = new Date().getTime();
@@ -320,7 +320,7 @@ export default {
       if (this.netkey.sort().toString() !== target_gwas_ids.sort().toString()) {
         this.netkey = target_gwas_ids;
         this.resetNet();
-        this.$refs.nettable.getTables(target_gwas_ids);
+        this.$refs.nettable.getTables(target_gwas_ids,this.rgmodel);
       }
     },
     hideTabs() {
