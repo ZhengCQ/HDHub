@@ -123,7 +123,7 @@
               @barPlotData="getBarData"
               :gwasIds="gwas_ids"
               :rgModel="rgmodel"
-              :filterInfo="setParaInfo"
+              :filterInfo="setParaInfoBar"
               :isTop="isTop"
               ref="rgtable"
             ></rg-table>
@@ -140,7 +140,7 @@
             <div v-show="scatterData">
               <pair-table
                 @ScatterPlotData="getScatterData"
-                :filterInfo="setParaInfo"
+                :filterInfo="setParaInfoScatter"
                 ref="pairtable"
               >
               </pair-table>
@@ -164,7 +164,6 @@
                 :x-data="colHeatMapData"
                 :y-data="colHeatMapData"
               />
-
               <net-graph
                 :className="traits[0]"
                 :nodes="netNodes"
@@ -178,7 +177,7 @@
                 @PlotData="getNetData"
                 :gwasIds="gwas_ids"
                 :rgModel="rgmodel"
-                :filterInfo="setParaInfo"
+                :filterInfo="setParaInfoNet"
                 ref="nettable"
               >
               </net-table>
@@ -244,6 +243,21 @@ export default {
         n_cor: [-1.2, -0.2],
         p_cutoff: 0.05,
       },
+      setParaInfoBar: {
+        p_cor: [0.2, 1.2],
+        n_cor: [-1.2, -0.2],
+        p_cutoff: 0.05,
+      },
+      setParaInfoScatter: {
+        p_cor: [0, 2],
+        n_cor: [-2, 0],
+        p_cutoff: 1,
+      },
+      setParaInfoNet: {
+        p_cor: [0, 2],
+        n_cor: [-2, 0],
+        p_cutoff: 1,
+      },
     };
   },
   created() {
@@ -262,14 +276,17 @@ export default {
   },
   watch: {
     activeName: function (val) {
-      if (val === "second") {
-        this.getScatterInfo();
-      }
       if (val === "first") {
         this.getBarInfo();
+        this.setParaInfo = this.setParaInfoBar
+      }
+      if (val === "second") {
+        this.getScatterInfo();
+        this.setParaInfo = this.setParaInfoScatter
       }
       if (val === "third") {
         this.getNetInfo();
+        this.setParaInfo = this.setParaInfoNet
       }
     },
     colHeatMapData: function (val) {
@@ -291,21 +308,17 @@ export default {
     },
     getCurrentGwas() {
       var table_info = this.$refs.rgtable.bar_table;
-      var target_gwas_ids = [table_info[1]["gwas1_id"]];
+      var target_gwas_ids = [table_info[0]["gwas1_id"]];
       for (var i of table_info) {
         target_gwas_ids.push(i["gwas2_id"]);
       }
+      console.log(target_gwas_ids)
       return target_gwas_ids;
     },
     getScatterInfo() {
       this.timer = new Date().getTime();
       var target_gwas_ids = this.getCurrentGwas();
-      if (
-        this.scatterkey.sort().toString() !== target_gwas_ids.sort().toString()
-      ) {
-        this.scatterkey = target_gwas_ids;
-        this.$refs.pairtable.getTables(target_gwas_ids);
-      }
+      this.$refs.pairtable.getTables(target_gwas_ids);
     },
     resetNet() {
         this.heatMapData = [],
@@ -362,7 +375,12 @@ export default {
     },
     fig1aset() {
       this.isSetup = false;
-      this.getBarInfo();
+      if (this.activeName === 'first'){
+          this.getBarInfo();
+      }else if (this.activeName === 'second'){
+        console.log(this.activeName)
+        this.getScatterInfo();
+      }
     },
   },
 };

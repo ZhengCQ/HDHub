@@ -51,37 +51,57 @@ def query_geneticcor(rgmodel):
     page_size = query['page_size']
     ### Trait1 info
     starttime = datetime.datetime.now()
+    in_gwas1 = value[0]
+    in_gwas2 = value[1:]
 
-    """
-    outdata = Gwaspairs2cor.to_collection_dict(
-        Gwaspairs2cor.query.filter(
-        and_(Gwaspairs2cor.Trait1_id.in_(value)
-            )
-        ).outerjoin(Genetic_Cor_HDL).filter(
-                    and_(Genetic_Cor_HDL.p<0.05,Genetic_Cor_HDL.id.in_(cor_ids))).order_by(Genetic_Cor_HDL.cor.desc()),\
-            page, page_size)
-    """
     if rgmodel == 'hdl':
-        outdata = Genetic_Cor_HDL().to_collection_dict(
-        Genetic_Cor_HDL().query.filter(
-                        and_(or_(Genetic_Cor_HDL.gwas1.in_(value),Genetic_Cor_HDL.gwas2.in_(value)),
-                            Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
-                         or_(
-                            and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
-                            and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
-                            )).order_by(Genetic_Cor_HDL.cor.desc()),\
-                page, page_size)
+        if len(in_gwas2) == 0:
+            outdata = Genetic_Cor_HDL().to_collection_dict(
+            Genetic_Cor_HDL().query.filter(
+                            and_(or_(Genetic_Cor_HDL.gwas1.in_(value),Genetic_Cor_HDL.gwas2.in_(value)),
+                                Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
+                                )).order_by(Genetic_Cor_HDL.cor.desc()),\
+                    page, page_size)
+        else:
+            outdata = Genetic_Cor_HDL().to_collection_dict(
+            Genetic_Cor_HDL().query.filter(
+                            and_(or_(
+                                    and_(Genetic_Cor_HDL.gwas1 == in_gwas1, Genetic_Cor_HDL.gwas2.in_(in_gwas2)),
+                                    and_(Genetic_Cor_HDL.gwas1.in_(in_gwas2), Genetic_Cor_HDL.gwas2 == in_gwas1)),
+                                Genetic_Cor_HDL.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['p_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
+                                )).order_by(Genetic_Cor_HDL.cor.desc()),\
+                    page, page_size)
+
         
     else:
-        outdata = Genetic_Cor_LDSC().to_collection_dict(
-        Genetic_Cor_LDSC().query.filter(
-                        and_(or_(Genetic_Cor_LDSC.p1.in_(value),Genetic_Cor_LDSC.p2.in_(value)),
-                            Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
-                        or_(
-                            and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
-                            and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
-                            )).order_by(Genetic_Cor_LDSC.rg.desc()),\
-                page, page_size)
+        if len(in_gwas2) == 0:
+            outdata = Genetic_Cor_LDSC().to_collection_dict(
+            Genetic_Cor_LDSC().query.filter(
+                            and_(or_(Genetic_Cor_LDSC.p1.in_(value),Genetic_Cor_LDSC.p2.in_(value)),
+                                Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
+                                )).order_by(Genetic_Cor_LDSC.rg.desc()),\
+                    page, page_size)
+        else:
+            outdata = Genetic_Cor_LDSC().to_collection_dict(
+            Genetic_Cor_LDSC().query.filter(
+                            and_(or_(
+                                    and_(Genetic_Cor_LDSC.p1 == in_gwas1, Genetic_Cor_LDSC.p2.in_(in_gwas2)),
+                                    and_(Genetic_Cor_LDSC.p1.in_(in_gwas2), Genetic_Cor_LDSC.p2 == in_gwas1)),
+                                Genetic_Cor_LDSC.p <= filter_cut['p_cutoff'],
+                            or_(
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['p_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['p_cor'][1]),
+                                and_(Genetic_Cor_LDSC.rg >= filter_cut['n_cor'][0],Genetic_Cor_LDSC.rg <= filter_cut['n_cor'][1]))
+                                )).order_by(Genetic_Cor_LDSC.rg.desc()),\
+                    page, page_size)
                 
     outdata['items'] = trans_order_table(value[0],outdata['items'])
     endtime = datetime.datetime.now()
@@ -167,8 +187,8 @@ def query_hdl_ldsc_geneticcor():
                             and_(Genetic_Cor_HDL.cor >= filter_cut['n_cor'][0],Genetic_Cor_HDL.cor <= filter_cut['n_cor'][1]))
                             )).order_by(Genetic_Cor_HDL.cor.desc()),\
                 1, len(gwas2))
-    
-    if len(hdl_data['items'])>1:
+
+    if len(hdl_data['items'])>=1:
         hdl_data['items'] = trans_order_table(gwas1,hdl_data['items'])
         df_hdl = pd.DataFrame(hdl_data['items'])
         df_hdl.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_HDL' for i in df_hdl])
@@ -190,7 +210,7 @@ def query_hdl_ldsc_geneticcor():
                             )).order_by(Genetic_Cor_LDSC.rg.desc()),\
                 1, len(gwas2))
     
-    if len(ldsc_data['items'])>1:
+    if len(ldsc_data['items'])>=1:
         ldsc_data['items'] = trans_order_table(gwas1,ldsc_data['items'])
         df_ldsc = pd.DataFrame(ldsc_data['items'])
         df_ldsc.columns = ([i if i in ['gwas1_id', 'gwas2_id', 'trait1', 'trait2', 'gwas1', 'gwas2'] else i + '_LDSC' for i in df_ldsc])
