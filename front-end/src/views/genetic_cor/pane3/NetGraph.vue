@@ -105,7 +105,6 @@ export default {
             label: {
               position: 'outside',
               formatter: function(value) {
-              console.log(value)
               if (value.name.length > 20) {
                 return value.name.substring(0, 20) + '...'
               } else {
