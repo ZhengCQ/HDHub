@@ -1,18 +1,10 @@
-import os
 
 from numpy.core.numeric import outer
-from app.extensions import db
 from flask import jsonify,request
 from app.api import bp
 from app.models import *
-import time
 from sqlalchemy import or_,and_
 import pandas as pd
-import numpy as np
-import itertools
-import seaborn as sns
-from itertools import cycle
-from matplotlib import colors
 import datetime
 
 from app.utils.genetic_cor import fetch_paired_gwas, trans_order_table,pre_heatmap,pre_network
