@@ -63,20 +63,20 @@
           <template slot="title"
             ><i class="el-icon-menu"></i>Further Exploring</template
           >
-          <el-menu-item @click="activeName = 'first'">BarPlot</el-menu-item>
+          <el-menu-item @click="activeName = 'first'">BarPlot (HDL or LDSC)</el-menu-item>
           <el-menu-item
             @click="
               showTabs(1);
               activeName = 'second';
             "
-            >Scatter of HDL VS LDSC</el-menu-item
+            >Scatter (HDL vs LDSC)</el-menu-item
           >
           <el-menu-item
             @click="
               showTabs(2);
               activeName = 'third';
             "
-            >NetGraph</el-menu-item
+            >NetGraph (HDL or LDSC)</el-menu-item
           >
         </el-submenu>
       </el-menu>
@@ -100,8 +100,8 @@
       </el-header>
 
       <el-main>
-        <el-tabs v-model="activeName" type="card" ref="tabs">
-          <el-tab-pane label="BarPlot of Genetic Correlation" name="first">
+        <el-tabs v-model="activeName" type="card" ref="tabs" closable @tab-remove="removeTab">
+          <el-tab-pane label="BarPlot" name="first">
             <el-row
               style="background: #fff; padding: 0px 0px 0px 0px; width: 100%"
             >
@@ -129,7 +129,7 @@
             ></rg-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Scatter of HDL VS LDSC" name="second">
+          <el-tab-pane label="Scatter of HDL VS LDSC" name="second" >
             <div v-if="scatterData">
               <error-pair-scatter
                 :key="timer"
@@ -274,7 +274,8 @@ export default {
   },
   mounted() {
     this.getBarInfo();
-    this.hideTabs();
+    this.hideTabs(1);
+    this.hideTabs(2);
   },
   watch: {
     activeName: function (val) {
@@ -338,11 +339,11 @@ export default {
         this.$refs.nettable.getTables(target_gwas_ids,this.rgmodel);
       }
     },
-    hideTabs() {
+    hideTabs(idx) {
       // this.$refs.tabs.$children[0].$el.style.display = 'none';
       this.$nextTick(() => {
-        this.$refs.tabs.$children[0].$refs.tabs[1].style.display = "none";
-        this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
+        this.$refs.tabs.$children[0].$refs.tabs[idx].style.display = "none";
+        // this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
       });
     },
     showTabs(idx) {
@@ -350,6 +351,27 @@ export default {
         this.$refs.tabs.$children[0].$refs.tabs[idx].style.display =
           "inline-block";
       });
+    },
+
+    removeTab(){
+      if (this.activeName === 'second'){
+        this.hideTabs(1)
+        this.activeName = 'first'
+      }
+      if (this.activeName === 'third'){
+        this.hideTabs(2)
+        this.netkey = []
+        this.resetNet()
+        this.activeName = 'first'
+      }
+      if (this.activeName === 'first'){
+          this.$notify({
+          message: "No Closing",
+          type: "error",
+          duration: 1000,
+        });
+      }
+
     },
     changeModel() {
       this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
@@ -383,6 +405,7 @@ export default {
       }else if (this.activeName === 'second'){
         console.log(this.activeName)
         this.getScatterInfo();
+        
       }
     },
   },
