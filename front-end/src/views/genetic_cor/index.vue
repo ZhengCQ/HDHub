@@ -1,6 +1,6 @@
 <template>
   <el-container style="border: 1px solid #eee; padding-top: 55px">
-    <el-aside
+    <el-aside v-show="isaside"
       width="250px"
       style="background-color: rgb(238, 241, 246); padding-top: 60px"
     >
@@ -89,14 +89,21 @@
         :FormInfo="setParaInfo"
       ></set-para>
       <el-header>
-        <div  v-show="activeName != 'third'" style="text-align: left; font-size: 16px">
+
+         <el-button v-if="isaside" plain type="success" @click="isaside=false;timer = new Date().getTime();">
+            Close Left
+          </el-button>
+          <el-button v-else type="warning" plain @click="isaside=true;timer = new Date().getTime();">
+            Show Left
+          </el-button>
+
+        <span  v-show="activeName != 'third'" style="padding-left:20px;font-size: 16px">
           <i
-            class="el-icon-setting el-icon--left"
-            style="margin-right: 15px"
+            class="el-icon-setting"
             @click="isSetup = true"
             >Setup</i
           >
-        </div>
+        </span>
       </el-header>
 
       <el-main>
@@ -159,6 +166,7 @@
 
             <div v-if="isresults">
               <heat-map
+                :key="timer"
                 :className="traits[0]" 
                 :rgModel="rgmodel"
                 :chart-data="heatMapData"
@@ -166,6 +174,7 @@
                 :y-data="colHeatMapData"
               />
               <net-graph
+                :key="timer"
                 :rgModel="rgmodel"
                 :className="traits[0]"
                 :nodes="netNodes"
@@ -220,6 +229,7 @@ export default {
     return {
       traitsDetailData: "",
       timer: "",
+      isaside:true,
       traits: [],
       gwas_ids: [],
       ishdl: true,

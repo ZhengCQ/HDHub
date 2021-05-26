@@ -86,7 +86,6 @@ export default {
         grid: {
           top: '12%',
           left: '30%',
-          right: '10%',
           bottom: '40%'
         },
         tooltip: {
@@ -101,8 +100,8 @@ export default {
             var status = value[2]
             var pvalue = value[3]
             return [source + ' Vs ' +
-                target, 'rg:' + status,
-                'pvalue' + pvalue
+                target, 'rg: ' + status,
+                'pvalue: ' + pvalue
             ].join('<br/>')
           }
         },
@@ -189,7 +188,7 @@ export default {
           calculable: true,
           precision:1,
           right: '5%',
-          color: ['#bf444c', 'white', 'blue'],
+          color: ['#fa6d1d', 'white', '#0780cf'],
           top: 'center'
         }
       })

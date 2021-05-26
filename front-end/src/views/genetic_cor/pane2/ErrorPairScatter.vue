@@ -189,12 +189,22 @@
             name: 'LDSC',
             min: this.min_x,
             max: this.max_x,
+            nameLocation: 'middle',
+            nameTextStyle:{
+              padding:20,
+              fontSize:18
+            },
             axisLine: { onZero: false }
           },
           yAxis: {
             name: 'HDL',
             min:this.min_y,
             max: this.max_y,
+            nameLocation: 'middle',
+            nameTextStyle:{
+              padding:20,
+              fontSize:18
+            },
             axisLine: { onZero: false }
           },
           series: [{
