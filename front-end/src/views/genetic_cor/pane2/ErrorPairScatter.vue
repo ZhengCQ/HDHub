@@ -178,7 +178,7 @@
           show: true,
           feature: {
             dataView: { readOnly: true },
-            saveAsImage: {}
+            saveAsImage: {pixelRatio:2}
           }
         },
           grid: {

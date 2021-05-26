@@ -141,7 +141,7 @@ export default {
           show: true,
           feature: {
             dataView: { readOnly: false },
-            saveAsImage: {}
+            saveAsImage: {pixelRatio:2}
           }
         },
         grid: {

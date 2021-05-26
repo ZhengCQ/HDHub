@@ -14,6 +14,10 @@ export default {
       type: String,
       default: 'chart'
     },
+    rgModel:{
+      type:String,
+      default : ''
+    },
     width: {
       type: String,
       default: '100%'
@@ -70,7 +74,7 @@ export default {
     setOptions(nodes, links, categories) {
       this.chart.setOption({
         title: {
-          text: 'Circular layout',
+          text: 'Circular layout' + " (" + this.rgModel.toUpperCase() + ")",
           subtext: this.className,
           left: '20%',
                     textStyle: {
@@ -94,7 +98,7 @@ export default {
           show: true,
           feature: {
             dataView: { readOnly: false },
-            saveAsImage: {}
+            saveAsImage: {pixelRatio:2}
           }
         },
         animationDurationUpdate: 1500,

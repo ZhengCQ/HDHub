@@ -42,23 +42,25 @@ def trans_order_table(gwas1,data):
 
 
 def pre_heatmap(df):
-    df_pivot = pd.pivot_table(df, index='trait1',columns='trait2',values='cor')
+    df_pivot_cor = pd.pivot_table(df, index='trait1',columns='trait2',values='cor')
+    df_pivot_pval = pd.pivot_table(df, index='trait1',columns='trait2',values='p')
     hData = []
-    hcol = list(df_pivot.columns)
+    hcol = list(df_pivot_cor.columns)
     for each in itertools.product(hcol, repeat=2):
         if each[0] == each[1]:
             hData.append([each[0],each[1],1])
         else:
             try:
-                if not np.isnan(df_pivot.at[each[0],each[1]]):
-                    hData.append([each[0],each[1],df_pivot.at[each[0],each[1]]])
-                elif not np.isnan(df_pivot.at[each[1],each[0]]):
-                    hData.append([each[0],each[1],df_pivot.at[each[1],each[0]]])
+                if not np.isnan(df_pivot_cor.at[each[0],each[1]]):
+                    hData.append([each[0],each[1],df_pivot_cor.at[each[0],each[1]],df_pivot_pval.at[each[0],each[1]]])
+
+                elif not np.isnan(df_pivot_cor.at[each[1],each[0]]):
+                    hData.append([each[0],each[1],df_pivot_cor.at[each[1],each[0]],df_pivot_pval.at[each[1],each[0]]])
                 else:
-                    hData.append([each[0],each[1],0])
+                    hData.append([each[0],each[1],0,1])
             except:
 
-                hData.append([each[0],each[1],0])
+                hData.append([each[0],each[1],0,1])
     return hData,hcol
 
 def pre_network(df):

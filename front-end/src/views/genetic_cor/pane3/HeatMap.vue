@@ -14,6 +14,10 @@ export default {
       type: String,
       default: 'chart'
     },
+    rgModel:{
+      type:String,
+      default : ''
+    },
     width: {
       type: String,
       default: '100%'
@@ -69,9 +73,9 @@ export default {
     setOptions(seriesData, xData, yData) {
       this.chart.setOption({
         title: {
-          text: 'HeatMap',
+          text: 'HeatMap' + " (" + this.rgModel.toUpperCase() + ")",
           subtext: this.className,
-                    textStyle: {
+          textStyle: {
             fontSize: 26
           },
           subtextStyle:{
@@ -95,8 +99,10 @@ export default {
             var source = value[0]
             var target = value[1]
             var status = value[2]
+            var pvalue = value[3]
             return [source + ' Vs ' +
-                target, 'rg:' + status
+                target, 'rg:' + status,
+                'pvalue' + pvalue
             ].join('<br/>')
           }
         },
@@ -106,9 +112,8 @@ export default {
             dataZoom: {
               yAxisIndex: 'none'
             },
-            dataView: { readOnly: false },
             restore: {},
-            saveAsImage: {}
+            saveAsImage: {pixelRatio:2}
           }
         },
         xAxis: {
@@ -153,6 +158,23 @@ export default {
         series: {
           type: 'heatmap',
           data: seriesData,
+          label: {
+            show:true,
+            formatter: function(data) {
+              if (data.value[3]){
+                if (data.value[3]<0.001){
+                  return  "**"
+                }else if (data.value[3]<0.05){
+                  return "*"
+                }
+                else{
+                  return ""
+                }
+              }else{
+                return ""
+              }
+            }
+          },
           itemStyle: {
             emphasis: {
               shadowBlur: 10
@@ -162,11 +184,12 @@ export default {
           }
         },
         visualMap: {
-          min: -1,
-          max: 1,
+          min: -1.0,
+          max: 1.0,
           calculable: true,
+          precision:1,
           right: '5%',
-          color: ['#bf444c', 'white', 'green'],
+          color: ['#bf444c', 'white', 'blue'],
           top: 'center'
         }
       })

@@ -153,7 +153,7 @@ def query_cycle_geneticcor(rgmodel):
                         )).order_by(Gwaspairs2cor.Trait1_id.desc())  
     outdata = Gwaspairs2cor.to_collection_dict_model(info_query,page, page_size, rgmodel)
     
-    df = pd.DataFrame([i.to_dict(rgmodel) for i in info_query.all()])[['trait1','trait2','cor']]
+    df = pd.DataFrame([i.to_dict(rgmodel) for i in info_query.all()])[['trait1','trait2','cor','p']]
     hData,hcol = pre_heatmap(df)
     nodes,links = pre_network(df)
 

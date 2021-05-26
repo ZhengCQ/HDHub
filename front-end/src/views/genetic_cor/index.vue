@@ -89,7 +89,7 @@
         :FormInfo="setParaInfo"
       ></set-para>
       <el-header>
-        <div style="text-align: left; font-size: 16px">
+        <div  v-show="activeName != 'third'" style="text-align: left; font-size: 16px">
           <i
             class="el-icon-setting el-icon--left"
             style="margin-right: 15px"
@@ -159,12 +159,14 @@
 
             <div v-if="isresults">
               <heat-map
-                :className="traits[0]"
+                :className="traits[0]" 
+                :rgModel="rgmodel"
                 :chart-data="heatMapData"
                 :x-data="colHeatMapData"
                 :y-data="colHeatMapData"
               />
               <net-graph
+                :rgModel="rgmodel"
                 :className="traits[0]"
                 :nodes="netNodes"
                 :links="netLinks"
@@ -363,6 +365,7 @@ export default {
       this.scatterData = data;
     },
     getNetData(data) {
+      console.log(data.heatmap)
       this.heatMapData = data.heatmap.data;
       this.colHeatMapData = data.heatmap.col;
       this.netLinks = data.network.links;
