@@ -1,4 +1,6 @@
 from app.extensions import db
+import numpy as np
+import pandas as pd
 
 class PaginatedAPIMixin(object):
     @staticmethod
@@ -57,15 +59,21 @@ class Gwaspairs2cor(PaginatedAPIMixin,db.Model):
             'trait2':self.trait2.Trait,
             'gwas1': self.trait1.Filename,
             'gwas2': self.trait2.Filename,
-            'cov': self.cor_hdl.cov if model == 'hdl' else self.cor_ldsc.gcov_int,
-            'cov_se': self.cor_hdl.cov_se if model == 'hdl' else self.cor_ldsc.gcov_int_se,
-            'cor': self.cor_hdl.cor if model == 'hdl' else self.cor_ldsc.rg,
-            'cor_se': self.cor_hdl.cor_se if model == 'hdl' else self.cor_ldsc.se,
-            'p': self.cor_hdl.p if model == 'hdl' else self.cor_ldsc.p,
-            'h1':self.cor_hdl.h1 if model == 'hdl' else self.cor_ldsc.h2_obs_p1,
-            'h1_se':self.cor_hdl.h1_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p1,
-            'h2':self.cor_hdl.h2 if model == 'hdl' else self.cor_ldsc.h2_obs_p2,
-            'h2_se':self.cor_hdl.h2_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p2,
+            'cov': self.cor_hdl.cov if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.gcov_int if not pd.isnull(self.cor_ldsc) else 0,
+            #'cov_se': self.cor_hdl.cov_se if model == 'hdl' else self.cor_ldsc.gcov_int_se,
+            'cov_se': self.cor_hdl.cov_se if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.gcov_int_se if not pd.isnull(self.cor_ldsc) else 0,
+            'cor': self.cor_hdl.cor if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.rg if not pd.isnull(self.cor_ldsc) else 0,
+            'cor_se': self.cor_hdl.cor_se if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.se if not pd.isnull(self.cor_ldsc) else 0,
+            #'cor_se': self.cor_hdl.cor_se if model == 'hdl' else self.cor_ldsc.se,
+            'p': self.cor_hdl.p if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.p if not pd.isnull(self.cor_ldsc) else 1,
+            #'h1':self.cor_hdl.h1 if model == 'hdl' else self.cor_ldsc.h2_obs_p1,
+            'h1': self.cor_hdl.h1 if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.h2_obs_p1 if not pd.isnull(self.cor_ldsc) else 0,
+            #'h1_se':self.cor_hdl.h1_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p1,
+            'h1_se': self.cor_hdl.h1_se if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.h2_obs_se_p1 if not pd.isnull(self.cor_ldsc) else 0,
+            #'h2':self.cor_hdl.h2 if model == 'hdl' else self.cor_ldsc.h2_obs_p2,
+            'h2': self.cor_hdl.h2 if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.h2_obs_p2 if not pd.isnull(self.cor_ldsc) else 0,
+            'h2_se': self.cor_hdl.h2_se if not pd.isnull(self.cor_hdl) and model == 'hdl' else self.cor_ldsc.h2_obs_se_p2 if not pd.isnull(self.cor_ldsc) else 0,        
+            #'h2_se':self.cor_hdl.h2_se if model == 'hdl' else self.cor_ldsc.h2_obs_se_p2,
         }
         return data
 
