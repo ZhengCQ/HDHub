@@ -108,15 +108,16 @@ export default {
     };
   },
   methods: {
-    getTables(target_gwas_ids) {
+    getTables(target_gwas_ids,rg_h2) {
       postHdlLdscPairCor({
         value: target_gwas_ids,
         query: this.listQuery,
         filter: this.filterInfo
-      }).then((res) => {
+      },rg_h2).then((res) => {
         this.total_items = res.data.total_items
         this.tableDataParis = res.data.items
         this.dataPlot = res.data.data_plot
+        console.log(this.dataPlot)
         this.$emit("ScatterPlotData",this.dataPlot);
       })
     },

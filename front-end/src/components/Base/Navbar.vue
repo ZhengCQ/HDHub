@@ -35,7 +35,7 @@
               <router-link to="/mulregression" class="nav-link">TaskRun</router-link>
             </li-->
             <li class="nav-item">
-              <router-link to="/genetic_cor" class="nav-link">Genetic Correlation</router-link>
+              <router-link to="/genetic_cor" class="nav-link">Genetic Correlation (rg)</router-link>
             </li>
             <!--li class="nav-item">
               <router-link to="/netgraph" class="nav-link">NetGraph</router-link>

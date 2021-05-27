@@ -26,6 +26,19 @@
             >
             </el-switch>
           </div>
+          <div style="text-align: center; margin-top:10px">
+            <el-switch
+              style="display: block"
+              v-model="isrg"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              active-text="rg"
+              inactive-text="h2"
+              @change="changeRg"
+              :disabled="activeName === 'third'"
+            >
+            </el-switch>
+          </div>
         </el-submenu>
 
         <el-submenu index="2">
@@ -63,20 +76,20 @@
           <template slot="title"
             ><i class="el-icon-menu"></i>Further Exploring</template
           >
-          <el-menu-item @click="activeName = 'first'">BarPlot (HDL or LDSC)</el-menu-item>
+          <el-menu-item @click="activeName = 'first'">BarPlot of Trait1 vs Others</el-menu-item>
           <el-menu-item
             @click="
               showTabs(1);
               activeName = 'second';
             "
-            >Scatter (HDL vs LDSC)</el-menu-item
+            >Scatter of HDL vs LDSC </el-menu-item
           >
           <el-menu-item
             @click="
               showTabs(2);
               activeName = 'third';
             "
-            >NetGraph (HDL or LDSC)</el-menu-item
+            >NetGraph(rg) of Pairwise</el-menu-item
           >
         </el-submenu>
       </el-menu>
@@ -96,7 +109,6 @@
           <el-button v-else type="warning" plain @click="isaside=true;timer = new Date().getTime();">
             Show Left
           </el-button>
-
         <span  v-show="activeName != 'third'" style="padding-left:20px;font-size: 16px">
           <i
             class="el-icon-setting"
@@ -108,6 +120,9 @@
 
       <el-main>
         <el-tabs v-model="activeName" type="card" ref="tabs" closable @tab-remove="removeTab">
+          <span>
+
+          </span>
           <el-tab-pane label="BarPlot" name="first">
             <el-row
               style="background: #fff; padding: 0px 0px 0px 0px; width: 100%"
@@ -116,8 +131,8 @@
               <div v-if="barPlotData">
                 <bar-plot
                   :key="timer"
-                  :class-name="subName"
-                  :subName="traits[0]"
+                  :class-name="className"
+                  :subName="subName"
                   :chart-data="barPlotData.data"
                   :col-data="barPlotData.col"
                   :pval-data="barPlotData.pval"
@@ -136,7 +151,7 @@
             ></rg-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Scatter of HDL VS LDSC" name="second" >
+          <el-tab-pane label="Scatter" name="second" >
             <div v-if="scatterData">
               <error-pair-scatter
                 :key="timer"
@@ -233,9 +248,12 @@ export default {
       traits: [],
       gwas_ids: [],
       ishdl: true,
+      isrg: true,
       isTop: true,
       rgmodel: "hdl",
-      subName: "Genetic Correction",
+      rg_h2: "rg",
+      subName: "",
+      className : '',
       barPlotData: "",
       scatterData: "",
       scatterkey: [],
@@ -315,9 +333,14 @@ export default {
   methods: {
     getBarInfo() {
       this.timer = new Date().getTime();
-      this.subName =
-        "BarPlot of Genetic Correction (" + this.rgmodel.toUpperCase() + ")";
-      this.$refs.rgtable.getTables(this.rgmodel);
+      if (this.isrg){
+        this.className = "BarPlot of Genetic Correlation ( rg," + this.rgmodel.toUpperCase() + ")";
+        this.subName = this.traits[0]
+      }else{
+        this.className = "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
+        this.subName = ""    
+      }
+      this.$refs.rgtable.getTables(this.rgmodel,this.rg_h2);
     },
     getCurrentGwas() {
       var table_info = this.$refs.rgtable.bar_table;
@@ -325,13 +348,12 @@ export default {
       for (var i of table_info) {
         target_gwas_ids.push(i["gwas2_id"]);
       }
-      console.log(target_gwas_ids)
       return target_gwas_ids;
     },
     getScatterInfo() {
       this.timer = new Date().getTime();
       var target_gwas_ids = this.getCurrentGwas();
-      this.$refs.pairtable.getTables(target_gwas_ids);
+      this.$refs.pairtable.getTables(target_gwas_ids, this.rg_h2);
     },
     resetNet() {
         this.heatMapData = [],
@@ -362,21 +384,21 @@ export default {
           "inline-block";
       });
     },
+    removeTab(targetName){
 
-    removeTab(){
-      if (this.activeName === 'second'){
+      if (targetName === 'second'){
         this.hideTabs(1)
         this.activeName = 'first'
       }
-      if (this.activeName === 'third'){
+      if (targetName === 'third'){
         this.hideTabs(2)
         this.netkey = []
         this.resetNet()
         this.activeName = 'first'
       }
-      if (this.activeName === 'first'){
+      if (targetName === 'first'){
           this.$notify({
-          message: "No Closing",
+          message: "No Closing for Tab1",
           type: "error",
           duration: 1000,
         });
@@ -387,11 +409,16 @@ export default {
       this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
       this.getBarInfo();
     },
+    changeRg() {
+      this.isrg ? (this.rg_h2 = "rg") : (this.rg_h2 = "h2");
+      this.getBarInfo();
+    },
     changeTrait2Model() {
       this.getBarInfo();
     },
     getBarData(data) {
       this.barPlotData = data;
+      console.log(this.barPlotData)
     },
     getScatterData(data) {
       this.scatterData = data;
@@ -442,5 +469,11 @@ export default {
 
 /deep/ .el-submenu__title {
   font-size: 18px;
+}
+
+/deep/ .el-menu-item-group__title {
+    padding: 7px 0 7px 20px;
+    font-size: 16px;
+    color: #a0b85d;
 }
 </style>

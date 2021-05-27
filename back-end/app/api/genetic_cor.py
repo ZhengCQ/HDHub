@@ -150,8 +150,8 @@ def query_cycle_geneticcor(rgmodel):
     return jsonify({'code': 200, 'data': outdata, 'heatmap':{'data':hData,'col':hcol},'network':{'nodes':nodes,'links':links}})
 
 
-@bp.route('/hdl_ldscPairCor', methods=['POST'])
-def query_hdl_ldsc_geneticcor():
+@bp.route('/hdl_ldscPairCor/<rg_h2>', methods=['POST'])
+def query_hdl_ldsc_geneticcor(rg_h2):
     data = request.get_json()
     #query = data['query']
     value = data['value']
@@ -207,11 +207,13 @@ def query_hdl_ldsc_geneticcor():
     else:
         return jsonify({'code': 400, 'message': 'There are not any value in LDSC database with current filtering'})  
 
+    
     df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
     items = df_m.reset_index().to_dict('records')
     total_items = df_m.shape[0]
     df_plot  = pd.DataFrame()
     df_plot['trait'] = df_m['trait1_x'] + '_vs_' + df_m['trait2_x']
+    
     df_plot.loc[:,'cor_HDL'] = df_m['cor_HDL']
     df_plot.loc[:,'cor_LDSC'] = df_m['cor_LDSC']
     df_plot.loc[:,'cor_LDSC_min'] = df_plot['cor_LDSC']-df_m['cor_se_LDSC']*1.96

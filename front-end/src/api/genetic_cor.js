@@ -64,9 +64,9 @@ export function postPairCor(data,model) {
     })
   }
 
-  export function postHdlLdscPairCor(data) {
+  export function postHdlLdscPairCor(data,rg_h2) {
     return request({
-      url: `/api/hdl_ldscPairCor`,
+      url: `/api/hdl_ldscPairCor/${rg_h2}`,
       method: 'post',
       data
     })

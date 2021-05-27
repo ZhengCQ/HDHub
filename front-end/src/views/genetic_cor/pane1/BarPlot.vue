@@ -35,7 +35,7 @@ export default {
     },
     pvalData: {
       type: Array,
-      required: true
+      required: false
     }
   },
   data() {
