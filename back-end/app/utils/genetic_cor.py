@@ -37,6 +37,7 @@ def trans_order_table(gwas1,data):
         if each['gwas2_id'] == gwas1:
             each['trait1'],each['trait2'] = each['trait2'],each['trait1']
             each['gwas1'],each['gwas2'] = each['gwas2'],each['gwas1']
+            each['gwas1_id'],each['gwas2_id'] = each['gwas2_id'],each['gwas1_id']
         trans_data.append(each)
     return trans_data
 

@@ -155,6 +155,7 @@ def query_hdl_ldsc_geneticcor(rg_h2):
     data = request.get_json()
     #query = data['query']
     value = data['value']
+    print(value)
     filter_cut = data['filter']
     ### values from front
     #page = query['page']
@@ -221,7 +222,7 @@ def query_hdl_ldsc_geneticcor(rg_h2):
     #df_plot.loc[:,'cor_HDL_min'] = df_plot['cor_HDL']-df_m['cor_se_HDL']*1.96
     #df_plot.loc[:,'cor_HDL_max'] = df_plot['cor_HDL']+df_m['cor_se_HDL']*1.96    
     #data_plot = df_plot.to_dict('split')['data']
-
+    print(df_m)
     return jsonify({'code': 200, 'data':{'items':items,'total_items':total_items}})
 
 

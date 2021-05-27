@@ -297,8 +297,8 @@ export default {
       this.traits = this.$route.params.traits;
     }
     if (this.gwas_ids.length == 0) {
-      this.gwas_ids = [11];
-      this.traits = ["Type 2 Diabetes"];
+      this.gwas_ids = [25, 11, 49, 7];
+      this.traits = ["Extreme bmi"];
     }
   },
   mounted() {
