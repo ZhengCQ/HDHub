@@ -132,7 +132,6 @@ export default {
         query: this.listQuery,
         filter: this.filterInfo
       },model)
-      console.log('yess')
         this.total_items = res.data._meta.total_items
         this.tableDataParis = res.data.items
         this.tableDataParis_allids = res.qy_ids

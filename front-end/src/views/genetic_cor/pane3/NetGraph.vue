@@ -68,7 +68,6 @@ export default {
         height: 800
       })
       this.setOptions(this.nodes, this.links, this.categories)
-      console.log(this.nodes,this.links,this.categories)
     },
 
     setOptions(nodes, links, categories) {

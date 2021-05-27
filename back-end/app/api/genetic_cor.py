@@ -211,19 +211,18 @@ def query_hdl_ldsc_geneticcor(rg_h2):
     df_m = df_hdl.merge(df_ldsc,left_index=True,right_index=True)
     items = df_m.reset_index().to_dict('records')
     total_items = df_m.shape[0]
-    df_plot  = pd.DataFrame()
-    df_plot['trait'] = df_m['trait1_x'] + '_vs_' + df_m['trait2_x']
+    #df_plot  = pd.DataFrame()
+    #df_plot['trait'] = df_m['trait1_x'] + '_vs_' + df_m['trait2_x']
     
-    df_plot.loc[:,'cor_HDL'] = df_m['cor_HDL']
-    df_plot.loc[:,'cor_LDSC'] = df_m['cor_LDSC']
-    df_plot.loc[:,'cor_LDSC_min'] = df_plot['cor_LDSC']-df_m['cor_se_LDSC']*1.96
-    df_plot.loc[:,'cor_LDSC_max'] = df_plot['cor_LDSC']+df_m['cor_se_LDSC']*1.96  
-    df_plot.loc[:,'cor_HDL_min'] = df_plot['cor_HDL']-df_m['cor_se_HDL']*1.96
-    df_plot.loc[:,'cor_HDL_max'] = df_plot['cor_HDL']+df_m['cor_se_HDL']*1.96
-        
-    data_plot = df_plot.to_dict('split')['data']
+    #df_plot.loc[:,'cor_HDL'] = df_m['cor_HDL']
+    ##df_plot.loc[:,'cor_LDSC'] = df_m['cor_LDSC']
+    #df_plot.loc[:,'cor_LDSC_min'] = df_plot['cor_LDSC']-df_m['cor_se_LDSC']*1.96
+    #df_plot.loc[:,'cor_LDSC_max'] = df_plot['cor_LDSC']+df_m['cor_se_LDSC']*1.96  
+    #df_plot.loc[:,'cor_HDL_min'] = df_plot['cor_HDL']-df_m['cor_se_HDL']*1.96
+    #df_plot.loc[:,'cor_HDL_max'] = df_plot['cor_HDL']+df_m['cor_se_HDL']*1.96    
+    #data_plot = df_plot.to_dict('split')['data']
 
-    return jsonify({'code': 200, 'data':{'items':items,'total_items':total_items, 'data_plot': data_plot}})
+    return jsonify({'code': 200, 'data':{'items':items,'total_items':total_items}})
 
 
 @bp.route('/cluster', methods=['POST'])

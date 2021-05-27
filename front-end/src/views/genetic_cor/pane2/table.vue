@@ -116,9 +116,8 @@ export default {
       },rg_h2).then((res) => {
         this.total_items = res.data.total_items
         this.tableDataParis = res.data.items
-        this.dataPlot = res.data.data_plot
-        console.log(this.dataPlot)
-        this.$emit("ScatterPlotData",this.dataPlot);
+        // this.dataPlot = res.data.data_plot
+        this.$emit("ScatterPlotData",this.tableDataParis);
       })
     },
   }

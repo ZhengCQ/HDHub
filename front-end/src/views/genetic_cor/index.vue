@@ -26,7 +26,8 @@
             >
             </el-switch>
           </div>
-          <div style="text-align: center; margin-top:10px">
+
+          <div v-show="activeName == 'first'" style="text-align: center; margin-top:10px">
             <el-switch
               style="display: block"
               v-model="isrg"
@@ -35,7 +36,7 @@
               active-text="rg"
               inactive-text="h2"
               @change="changeRg"
-              :disabled="activeName === 'third'"
+              :disabled="activeName !== 'first'"
             >
             </el-switch>
           </div>
@@ -189,7 +190,7 @@
                 :y-data="colHeatMapData"
               />
               <net-graph
-                :key="timer"
+                :key="timer+1"
                 :rgModel="rgmodel"
                 :className="traits[0]"
                 :nodes="netNodes"
@@ -418,13 +419,45 @@ export default {
     },
     getBarData(data) {
       this.barPlotData = data;
-      console.log(this.barPlotData)
     },
+    getScatterData_rg(data){
+      var scatterData = []
+      for (var i of data){
+        var items = 
+        [i['trait1_x'] + '_vs_' + i['trait1_y'],
+        i['cor_HDL'],
+        i['cor_LDSC'],
+        i['cor_LDSC'] - i['cor_se_LDSC']*1.96,
+        i['cor_LDSC'] + i['cor_se_LDSC']*1.96,
+        i['cor_HDL'] - i['cor_se_HDL']*1.96,
+        i['cor_HDL'] + i['cor_se_HDL']*1.96,
+        ]
+        scatterData.push(items)
+      }
+      return scatterData
+    },
+    getScatterData_h2(data){
+      var scatterData = []
+      for (var i of data){
+        var items = 
+        [i['trait2_x'],
+        i['h2_HDL'],
+        i['h2_LDSC'],
+        i['h2_LDSC'] - i['h2_se_LDSC']*1.96,
+        i['h2_LDSC'] + i['h2_se_LDSC']*1.96,
+        i['h2_HDL'] - i['h2_se_HDL']*1.96,
+        i['h2_HDL'] + i['h2_se_HDL']*1.96,
+        ]
+        scatterData.push(items)
+      }
+      return scatterData
+    },
+
     getScatterData(data) {
-      this.scatterData = data;
+      this.scatterData = this.getScatterData_rg(data)
+       // this.scatterData = this.getScatterData_h2(data)
     },
     getNetData(data) {
-      console.log(data.heatmap)
       this.heatMapData = data.heatmap.data;
       this.colHeatMapData = data.heatmap.col;
       this.netLinks = data.network.links;
@@ -440,7 +473,6 @@ export default {
       if (this.activeName === 'first'){
           this.getBarInfo();
       }else if (this.activeName === 'second'){
-        console.log(this.activeName)
         this.getScatterInfo();
         
       }
