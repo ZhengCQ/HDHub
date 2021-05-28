@@ -76,8 +76,13 @@ export default {
         });
     },
     queryTraitsDetail() {
+      this.$router.push({
+        name: "Genetic_cor",
+        params: { traits:this.form['traits']}
+      });
       // this.reset_datainfo();
-      queryInfoDetail({
+      // this.$emit("traitsDetailData",this.form)
+      /*queryInfoDetail({
         value: this.form,
       }).then((res) => {
         this.$emit("traitsDetailData", res.data);
@@ -85,7 +90,7 @@ export default {
         //this.$nextTick(function () {
         //  this.toggleSelection(this.traitsDetailData, "traitstab");
         //});
-      });
+      })*/;
     },
   },
 };

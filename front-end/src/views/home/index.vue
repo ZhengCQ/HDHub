@@ -74,6 +74,7 @@ export default {
     getTraitsData(data) {
       // timer 作为key，每次加载都重置
       this.timer = new Date().getTime();
+      console.log(data)
       this.traitsDetailData = data;
     },
 

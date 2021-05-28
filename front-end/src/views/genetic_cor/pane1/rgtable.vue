@@ -146,7 +146,7 @@
     watch: {
       multiSel: function (val) {
         if (!this.isTop) {
-          this.getBarPic()
+          this.getBarPic(this.rg_h2)
         }
       },
       rgModel: function (val) {
