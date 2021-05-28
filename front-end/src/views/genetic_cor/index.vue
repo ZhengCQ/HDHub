@@ -92,6 +92,10 @@
                 else:
                     Trait1 VS All Traits in database
               </p>
+
+              <h5>
+                Try to Drag Table to ReOrder Traits.
+              </h5>
             </div>
 
             <gwas-table @gwasSel="getGwasSel" ref="gwastab"></gwas-table>
@@ -151,321 +155,312 @@
 
 
 <script>
-  import SetPara from "./setpara.vue";
-  import GwasTable from "./pane_gwas/GwasTable.vue";
-  import RgTable from "./pane1/rgtable.vue";
-  import BarPlot from "./pane1/BarPlot";
-  import PairTable from "./pane2/table.vue";
-  import ErrorPairScatter from "./pane2/ErrorPairScatter";
-  import NetTable from "./pane3/table.vue";
-  import HeatMap from "./pane3/HeatMap.vue";
-  import NetGraph from "./pane3/NetGraph.vue";
+import SetPara from "./setpara.vue";
+import GwasTable from "./pane_gwas/GwasTable.vue";
+import RgTable from "./pane1/rgtable.vue";
+import BarPlot from "./pane1/BarPlot";
+import PairTable from "./pane2/table.vue";
+import ErrorPairScatter from "./pane2/ErrorPairScatter";
+import NetTable from "./pane3/table.vue";
+import HeatMap from "./pane3/HeatMap.vue";
+import NetGraph from "./pane3/NetGraph.vue";
 
-  export default {
-    name: "Genetic_cor",
-    components: {
-      SetPara,
-      GwasTable,
-      RgTable,
-      BarPlot,
-      PairTable,
-      ErrorPairScatter,
-      NetTable,
-      HeatMap,
-      NetGraph,
-    },
-    data() {
-      return {
-        traitsDetailData: "",
-        timer: "",
-        isaside: true,
-        traits: [],
-        gwas_ids: [],
-        ishdl: true,
-        isrg: true,
-        isTop: true,
-        rgmodel: "hdl",
-        rg_h2: "rg",
-        subName: "",
-        className: '',
-        barPlotData: "",
-        scatterData: "",
-        scatterkey: [],
-        iswaiting: true,
-        isresults: false,
-        job_step: 0,
-        netkey: [],
-        heatMapData: [],
-        colHeatMapData: [],
-        netNodes: [],
-        netLinks: [],
-        netCategories: [],
-        activeName: "gwas",
-        isSetup: false,
-        setParaInfo: {
-          p_cor: [0.2, 1.2],
-          n_cor: [-1.2, -0.2],
-          p_cutoff: 0.05,
-        },
-        setParaInfoBar: {
-          p_cor: [0.2, 1.2],
-          n_cor: [-1.2, -0.2],
-          p_cutoff: 0.05,
-        },
-        setParaInfoScatter: {
-          p_cor: [0, 2],
-          n_cor: [-2, 0],
-          p_cutoff: 1,
-        },
-        setParaInfoNet: {
-          p_cor: [0, 2],
-          n_cor: [-2, 0],
-          p_cutoff: 1,
-        },
-      };
-    },
-    created() {
-      if (this.$route.params.traits) {
-        // this.gwas_ids = this.$route.params.gwas;
-        this.traits = this.$route.params.traits;
+export default {
+  name: "Genetic_cor",
+  components: {
+    SetPara,
+    GwasTable,
+    RgTable,
+    BarPlot,
+    PairTable,
+    ErrorPairScatter,
+    NetTable,
+    HeatMap,
+    NetGraph,
+  },
+  data() {
+    return {
+      traitsDetailData: "",
+      timer: "",
+      isaside: true,
+      traits: [],
+      gwas_ids: [],
+      ishdl: true,
+      isrg: true,
+      isTop: true,
+      rgmodel: "hdl",
+      rg_h2: "rg",
+      subName: "",
+      className: "",
+      barPlotData: "",
+      scatterData: "",
+      scatterkey: [],
+      iswaiting: true,
+      isresults: false,
+      job_step: 0,
+      netkey: [],
+      heatMapData: [],
+      colHeatMapData: [],
+      netNodes: [],
+      netLinks: [],
+      netCategories: [],
+      activeName: "gwas",
+      isSetup: false,
+      setParaInfo: {
+        p_cor: [0.2, 1.2],
+        n_cor: [-1.2, -0.2],
+        p_cutoff: 0.05,
+      },
+      setParaInfoBar: {
+        p_cor: [0.2, 1.2],
+        n_cor: [-1.2, -0.2],
+        p_cutoff: 0.05,
+      },
+      setParaInfoScatter: {
+        p_cor: [0, 2],
+        n_cor: [-2, 0],
+        p_cutoff: 1,
+      },
+      setParaInfoNet: {
+        p_cor: [0, 2],
+        n_cor: [-2, 0],
+        p_cutoff: 1,
+      },
+    };
+  },
+  created() {
+    if (this.$route.params.traits) {
+      // this.gwas_ids = this.$route.params.gwas;
+      this.traits = this.$route.params.traits;
+    }
+    if (this.traits.length == 0) {
+      // this.gwas_ids = [25, 11, 49, 7];
+      this.traits = [
+        "Coronary artery disease",
+        "Extreme bmi",
+        "Type 2 Diabetes",
+        "HDL cholesterol",
+        "Total cholesterol in large LDL",
+      ];
+    }
+  },
+  mounted() {
+    this.getGwasInfo();
+    this.hideTabs(2);
+    this.hideTabs(3);
+  },
+  watch: {
+    activeName: function (val) {
+      if (val === "first") {
+        this.getBarInfo();
+        this.setParaInfo = this.setParaInfoBar;
       }
-      console.log(this.traits)
-      if (this.traits.length == 0) {
-        // this.gwas_ids = [25, 11, 49, 7];
-        this.traits = ["Coronary artery disease", "Extreme bmi", "Type 2 Diabetes", "HDL cholesterol", "Total cholesterol in large LDL"]
+      if (val === "second") {
+        this.getScatterInfo();
+        this.setParaInfo = this.setParaInfoScatter;
+      }
+      if (val === "third") {
+        this.getNetInfo();
+        this.setParaInfo = this.setParaInfoNet;
       }
     },
-    mounted() {
-      this.getGwasInfo();
-      this.hideTabs(2);
-      this.hideTabs(3);
+    colHeatMapData: function (val) {
+      if (val.length == 0) {
+        this.isresults = false;
+        this.iswaiting = true;
+      } else if (val.length > 0) {
+        this.isresults = true;
+        this.iswaiting = false;
+      }
     },
-    watch: {
-      activeName: function (val) {
-        if (val === "first") {
-          this.getBarInfo();
-          this.setParaInfo = this.setParaInfoBar
-        }
-        if (val === "second") {
-          this.getScatterInfo();
-          this.setParaInfo = this.setParaInfoScatter
-        }
-        if (val === "third") {
-          this.getNetInfo();
-          this.setParaInfo = this.setParaInfoNet
-        }
-      },
-      colHeatMapData: function (val) {
-        if (val.length == 0) {
-          this.isresults = false;
-          this.iswaiting = true;
-        } else if (val.length > 0) {
-          this.isresults = true;
-          this.iswaiting = false;
-        }
-      },
+  },
+  methods: {
+    getGwasInfo() {
+      this.$refs.gwastab.queryTraitsDetail(this.traits);
     },
-    methods: {
-      getGwasInfo() {
-        this.$refs.gwastab.queryTraitsDetail(this.traits)
-      },
-      getGwasSel(data) {
-        this.gwas_ids = []
-        for (var i of data) {
-          this.gwas_ids.push(i['id'])
-        }
-        this.$nextTick(() => {
-          if (this.gwas_ids.length > 0) {
-            if (this.gwas_ids.length == 1){
-                this.$notify({
-                title: "Model2",
-                message: this.traits[0]  + ":" + " Only One Traits, All the Related Traits Will Be Show",
-                type: "success",
-                duration: 3000,
-          });
-            }else{
-                this.$notify({
-                title: "Model1",
-                message: this.traits[0]  + ":" + " Vs Others",
-                type: "success",
-                duration: 3000,
-          });
-            }
-            this.getBarInfo(this.gwas_ids)
-          }
-        })
-      },
-      getBarInfo() {
-        this.timer = new Date().getTime();
-        if (this.isrg) {
-          this.className = "BarPlot of Genetic Correlation ( rg," + this.rgmodel.toUpperCase() + ")";
-          this.subName = this.traits[0]
-        } else {
-          this.className = "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
-          this.subName = ""
-        }
-        this.$refs.rgtable.getTables(this.rgmodel, this.rg_h2);
-      },
-      getBarData(data) {
-        this.barPlotData = data;
-      },
-      getCurrentGwas() {
-        var table_info = this.$refs.rgtable.bar_table;
-        var target_gwas_ids = [table_info[0]["gwas1_id"]];
-        for (var i of table_info) {
-          target_gwas_ids.push(i["gwas2_id"]);
-        }
-        return target_gwas_ids;
-      },
-      getScatterInfo() {
-        this.timer = new Date().getTime();
-        var target_gwas_ids = this.getCurrentGwas();
-        this.$refs.pairtable.getTables(target_gwas_ids, this.rg_h2);
-      },
-      resetNet() {
-        this.heatMapData = [],
-          this.colHeatMapData = [],
-          this.netNodes = [],
-          this.netLinks = [],
-          this.netCategories = [];
-      },
-      getNetInfo() {
-        this.timer = new Date().getTime();
-        var target_gwas_ids = this.getCurrentGwas();
-        if (this.netkey.sort().toString() !== target_gwas_ids.sort().toString()) {
-          this.netkey = target_gwas_ids;
-          this.resetNet();
-          this.$refs.nettable.getTables(target_gwas_ids, this.rgmodel);
-        }
-      },
-      hideTabs(idx) {
-        // this.$refs.tabs.$children[0].$el.style.display = 'none';
-        this.$nextTick(() => {
-          this.$refs.tabs.$children[0].$refs.tabs[idx].style.display = "none";
-          // this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
+    getGwasSel(data) {
+      this.gwas_ids = [];
+      this.traits = [];
+      for (var i of data) {
+        this.gwas_ids.push(i["id"]);
+        this.traits.push(i["trait"]);
+      }
+    },
+    getBarInfo() {
+      this.timer = new Date().getTime();
+      if (this.isrg) {
+        this.className =
+          "BarPlot of Genetic Correlation ( rg," +
+          this.rgmodel.toUpperCase() +
+          ")";
+        this.subName = this.traits[0];
+      } else {
+        this.className =
+          "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
+        this.subName = "";
+      }
+      this.$refs.rgtable.getTables(this.rgmodel, this.rg_h2);
+    },
+    getBarData(data) {
+      this.barPlotData = data;
+    },
+    getCurrentGwas() {
+      var table_info = this.$refs.rgtable.bar_table;
+      var target_gwas_ids = [table_info[0]["gwas1_id"]];
+      for (var i of table_info) {
+        target_gwas_ids.push(i["gwas2_id"]);
+      }
+      return target_gwas_ids;
+    },
+    getScatterInfo() {
+      this.timer = new Date().getTime();
+      var target_gwas_ids = this.getCurrentGwas();
+      this.$refs.pairtable.getTables(target_gwas_ids, this.rg_h2);
+    },
+    resetNet() {
+      (this.heatMapData = []),
+        (this.colHeatMapData = []),
+        (this.netNodes = []),
+        (this.netLinks = []),
+        (this.netCategories = []);
+    },
+    getNetInfo() {
+      this.timer = new Date().getTime();
+      var target_gwas_ids = this.getCurrentGwas();
+      if (this.netkey.sort().toString() !== target_gwas_ids.sort().toString()) {
+        this.netkey = target_gwas_ids;
+        this.resetNet();
+        this.$refs.nettable.getTables(target_gwas_ids, this.rgmodel);
+      }
+    },
+    hideTabs(idx) {
+      // this.$refs.tabs.$children[0].$el.style.display = 'none';
+      this.$nextTick(() => {
+        this.$refs.tabs.$children[0].$refs.tabs[idx].style.display = "none";
+        // this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
+      });
+    },
+    showTabs(idx) {
+      this.$nextTick(() => {
+        this.$refs.tabs.$children[0].$refs.tabs[idx].style.display =
+          "inline-block";
+      });
+    },
+    removeTab(targetName) {
+      if (targetName === "second") {
+        this.hideTabs(1);
+        this.activeName = "first";
+      }
+      if (targetName === "third") {
+        this.hideTabs(2);
+        this.netkey = [];
+        this.resetNet();
+        this.activeName = "first";
+      }
+      if (targetName === "first") {
+        this.$notify({
+          message: "No Closing for Tab1",
+          type: "error",
+          duration: 1000,
         });
-      },
-      showTabs(idx) {
-        this.$nextTick(() => {
-          this.$refs.tabs.$children[0].$refs.tabs[idx].style.display =
-            "inline-block";
-        });
-      },
-      removeTab(targetName) {
-        if (targetName === 'second') {
-          this.hideTabs(1)
-          this.activeName = 'first'
-        }
-        if (targetName === 'third') {
-          this.hideTabs(2)
-          this.netkey = []
-          this.resetNet()
-          this.activeName = 'first'
-        }
-        if (targetName === 'first') {
-          this.$notify({
-            message: "No Closing for Tab1",
-            type: "error",
-            duration: 1000,
-          });
-        }
+      }
+    },
+    changeModel() {
+      this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
+      this.getBarInfo();
+    },
+    changeRg() {
+      this.isrg ? (this.rg_h2 = "rg") : (this.rg_h2 = "h2");
+      this.getBarInfo();
+    },
+    changeTrait2Model() {
+      this.getBarInfo();
+    },
+    getScatterData_rg(data) {
+      var scatterData = [];
+      for (var i of data) {
+        var items = [
+          i["trait1_x"] + "_vs_" + i["trait1_y"],
+          i["cor_HDL"],
+          i["cor_LDSC"],
+          i["cor_LDSC"] - i["cor_se_LDSC"] * 1.96,
+          i["cor_LDSC"] + i["cor_se_LDSC"] * 1.96,
+          i["cor_HDL"] - i["cor_se_HDL"] * 1.96,
+          i["cor_HDL"] + i["cor_se_HDL"] * 1.96,
+        ];
+        scatterData.push(items);
+      }
+      return scatterData;
+    },
+    getScatterData_h2(data) {
+      var scatterData = [];
+      for (var i of data) {
+        var items = [
+          i["trait2_x"],
+          i["h2_HDL"],
+          i["h2_LDSC"],
+          i["h2_LDSC"] - i["h2_se_LDSC"] * 1.96,
+          i["h2_LDSC"] + i["h2_se_LDSC"] * 1.96,
+          i["h2_HDL"] - i["h2_se_HDL"] * 1.96,
+          i["h2_HDL"] + i["h2_se_HDL"] * 1.96,
+        ];
+        scatterData.push(items);
+      }
+      return scatterData;
+    },
 
-      },
-      changeModel() {
-        this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
-        this.getBarInfo();
-      },
-      changeRg() {
-        this.isrg ? (this.rg_h2 = "rg") : (this.rg_h2 = "h2");
-        this.getBarInfo();
-      },
-      changeTrait2Model() {
-        this.getBarInfo();
-      },
-      getScatterData_rg(data) {
-        var scatterData = []
-        for (var i of data) {
-          var items = [i['trait1_x'] + '_vs_' + i['trait1_y'],
-            i['cor_HDL'],
-            i['cor_LDSC'],
-            i['cor_LDSC'] - i['cor_se_LDSC'] * 1.96,
-            i['cor_LDSC'] + i['cor_se_LDSC'] * 1.96,
-            i['cor_HDL'] - i['cor_se_HDL'] * 1.96,
-            i['cor_HDL'] + i['cor_se_HDL'] * 1.96,
-          ]
-          scatterData.push(items)
-        }
-        return scatterData
-      },
-      getScatterData_h2(data) {
-        var scatterData = []
-        for (var i of data) {
-          var items = [i['trait2_x'],
-            i['h2_HDL'],
-            i['h2_LDSC'],
-            i['h2_LDSC'] - i['h2_se_LDSC'] * 1.96,
-            i['h2_LDSC'] + i['h2_se_LDSC'] * 1.96,
-            i['h2_HDL'] - i['h2_se_HDL'] * 1.96,
-            i['h2_HDL'] + i['h2_se_HDL'] * 1.96,
-          ]
-          scatterData.push(items)
-        }
-        return scatterData
-      },
-
-      getScatterData(data) {
-        this.scatterData = this.getScatterData_rg(data)
-        // this.scatterData = this.getScatterData_h2(data)
-      },
-      getNetData(data) {
-        this.heatMapData = data.heatmap.data;
-        this.colHeatMapData = data.heatmap.col;
-        this.netLinks = data.network.links;
-        this.netNodes = data.network.nodes;
-        this.netCategories = [{
+    getScatterData(data) {
+      this.scatterData = this.getScatterData_rg(data);
+      // this.scatterData = this.getScatterData_h2(data)
+    },
+    getNetData(data) {
+      this.heatMapData = data.heatmap.data;
+      this.colHeatMapData = data.heatmap.col;
+      this.netLinks = data.network.links;
+      this.netNodes = data.network.nodes;
+      this.netCategories = [
+        {
           name: "类别0",
-        }, ];
-      },
-      fig1aset() {
-        this.isSetup = false;
-        if (this.activeName === 'first') {
-          this.getBarInfo();
-        } else if (this.activeName === 'second') {
-          this.getScatterInfo();
-
-        }
-      },
+        },
+      ];
     },
-  };
-
+    fig1aset() {
+      this.isSetup = false;
+      if (this.activeName === "first") {
+        this.getBarInfo();
+      } else if (this.activeName === "second") {
+        this.getScatterInfo();
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
-  .el-header {
-    background-color: #b3c0d1;
-    color: #333;
-    line-height: 60px;
-  }
+.el-header {
+  background-color: #b3c0d1;
+  color: #333;
+  line-height: 60px;
+}
 
-  .el-aside {
-    color: #333;
-  }
+.el-aside {
+  color: #333;
+}
 
-  .el-select {
-    position: relative;
-    font-size: 14px;
-    display: inline-block;
-    width: 10%;
-  }
+.el-select {
+  position: relative;
+  font-size: 14px;
+  display: inline-block;
+  width: 10%;
+}
 
-  /deep/ .el-submenu__title {
-    font-size: 18px;
-  }
+/deep/ .el-submenu__title {
+  font-size: 18px;
+}
 
-  /deep/ .el-menu-item-group__title {
-    padding: 7px 0 7px 20px;
-    font-size: 16px;
-    color: #a0b85d;
-  }
-
+/deep/ .el-menu-item-group__title {
+  padding: 7px 0 7px 20px;
+  font-size: 16px;
+  color: #a0b85d;
+}
 </style>
