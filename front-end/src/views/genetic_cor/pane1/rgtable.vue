@@ -143,6 +143,11 @@
         ],
       };
     },
+    mounted() {
+      if (this.gwasIds.length > 0){
+        this.getTables(this.rgModel, this.rg_h2) 
+      }
+    },
     watch: {
       multiSel: function (val) {
         if (!this.isTop) {
@@ -213,7 +218,8 @@
               val.cor + val.cor_se * 1.96
             ])
           })
-          this.$emit("barPlotData", this.barPlotData_rg);
+          this.$emit("barPlotData", [this.barPlotData_rg,this.bar_table]);
+
         } else {
           var total_indx = 0
           sorted_keys_array.forEach((v, idx) => {
@@ -234,7 +240,7 @@
               this.bar_table[0].h1 - this.bar_table[0].h1_se * 1.96,
               this.bar_table[0].h1 + this.bar_table[0].h1_se * 1.96
             ])
-          this.$emit("barPlotData", this.barPlotData_h2);
+          this.$emit("barPlotData", [this.barPlotData_h2,this.bar_table]);
 
         }
       },

@@ -17,13 +17,20 @@
           </div>
         </el-submenu>
 
-        <el-submenu index="2">
+        <el-submenu index="2" style="margin-bottom:20px;">
           <template slot="title"><i class="el-icon-message"></i>Traits Information</template>
 
           <el-menu-item @click="
+              showTabs(0);
+              hideTabs(1)
+              hideTabs(2)
+              hideTabs(3)
+              iscomfirmed=false;
               activeName = 'gwas';
-            ">Check Traits Detail</el-menu-item>
-          <el-menu-item index="/"><i class="el-icon-back"></i> Back Home to Reselect</el-menu-item>
+            ">ReSelect Traits </el-menu-item>
+
+
+          <el-menu-item i><i class="el-icon-back"></i> Back Home to ReInput</el-menu-item>
 
           <el-menu-item-group>
             <template slot="title">Trait1</template>
@@ -42,7 +49,8 @@
             </div>
           </el-menu-item-group>
         </el-submenu>
-        <el-submenu index="3">
+
+        <el-submenu index="3" v-show='iscomfirmed'>
           <template slot="title"><i class="el-icon-menu"></i>Further Exploring</template>
           <el-menu-item @click="activeName = 'first'">BarPlot of Trait1 vs Others</el-menu-item>
           <el-menu-item @click="
@@ -75,7 +83,7 @@
       <el-main>
         <el-tabs v-model="activeName" type="card" ref="tabs" closable @tab-remove="removeTab">
           <el-tab-pane label="Traits Informations" name="gwas">
-            <div v-if="iswaiting" style="padding-top: 20px; padding-bottom: 20px;" align="left">
+            <div style="padding-top: 20px; padding-bottom: 20px;" align="left">
               <h5>
                 Trait1: {{traits[0]}} </br>
               </h5>
@@ -83,14 +91,14 @@
                 First Row ----> Trait1 </br>
               </p>
               <h5>
-                Trait2: Others </br> 
+                Trait2: Others </br>
               </h5>
-                            <p>
+              <p>
                 Others Row ----> Trait2 </br>
-                if Trait2 == True:
-                    Trait1 VS Trait2
+                if Trait2:
+                Trait1 VS Trait2
                 else:
-                    Trait1 VS All Traits in database
+                Trait1 vs all Traits in database
               </p>
 
               <h5>
@@ -98,7 +106,34 @@
               </h5>
             </div>
 
-            <gwas-table @gwasSel="getGwasSel" ref="gwastab"></gwas-table>
+        <el-button
+          round
+          plain
+          type="primary"
+          icon="el-icon-search"
+          style="margin-bottom: 30px"
+          @click="toConfirm()"
+          >Confirmed
+        </el-button>
+
+        <el-button
+          round
+          plain
+          type="primary"
+          icon="el-icon-edit"
+          style="margin-bottom: 30px"
+          @click="toEdit()"
+          >Edit
+        </el-button>
+      
+            <div v-if="iscomfirmed">
+                <gwas-table-show  :key="22" @gwasSel="getGwasSel" ref="gwastab"></gwas-table-show>
+
+            </div>
+             <div>
+                <gwas-table  :key="33" @gwasSel="getGwasSel" ref="gwastab"></gwas-table>
+            </div>           
+
           </el-tab-pane>
           <el-tab-pane label="BarPlot" name="first">
             <el-row style="background: #fff; padding: 0px 0px 0px 0px; width: 100%">
@@ -109,8 +144,8 @@
               </div>
             </el-row>
 
-            <rg-table @barPlotData="getBarData" :gwasIds="gwas_ids" :rgModel="rgmodel" :filterInfo="setParaInfoBar"
-              :isTop="isTop" ref="rgtable"></rg-table>
+            <rg-table :key="timer" @barPlotData="getBarData" :gwasIds="gwas_ids" :rgModel="rgmodel"
+              :filterInfo="setParaInfoBar" :isTop="isTop" ref="rgtable"></rg-table>
           </el-tab-pane>
 
           <el-tab-pane label="Scatter" name="second">
@@ -155,312 +190,342 @@
 
 
 <script>
-import SetPara from "./setpara.vue";
-import GwasTable from "./pane_gwas/GwasTable.vue";
-import RgTable from "./pane1/rgtable.vue";
-import BarPlot from "./pane1/BarPlot";
-import PairTable from "./pane2/table.vue";
-import ErrorPairScatter from "./pane2/ErrorPairScatter";
-import NetTable from "./pane3/table.vue";
-import HeatMap from "./pane3/HeatMap.vue";
-import NetGraph from "./pane3/NetGraph.vue";
+  import SetPara from "./setpara.vue";
+  import GwasTable from "./pane_gwas/GwasTable.vue";
+  import GwasTableShow from "./pane_gwas/GwasTableShow.vue";
+  import RgTable from "./pane1/rgtable.vue";
+  import BarPlot from "./pane1/BarPlot";
+  import PairTable from "./pane2/table.vue";
+  import ErrorPairScatter from "./pane2/ErrorPairScatter";
+  import NetTable from "./pane3/table.vue";
+  import HeatMap from "./pane3/HeatMap.vue";
+  import NetGraph from "./pane3/NetGraph.vue";
 
-export default {
-  name: "Genetic_cor",
-  components: {
-    SetPara,
-    GwasTable,
-    RgTable,
-    BarPlot,
-    PairTable,
-    ErrorPairScatter,
-    NetTable,
-    HeatMap,
-    NetGraph,
-  },
-  data() {
-    return {
-      traitsDetailData: "",
-      timer: "",
-      isaside: true,
-      traits: [],
-      gwas_ids: [],
-      ishdl: true,
-      isrg: true,
-      isTop: true,
-      rgmodel: "hdl",
-      rg_h2: "rg",
-      subName: "",
-      className: "",
-      barPlotData: "",
-      scatterData: "",
-      scatterkey: [],
-      iswaiting: true,
-      isresults: false,
-      job_step: 0,
-      netkey: [],
-      heatMapData: [],
-      colHeatMapData: [],
-      netNodes: [],
-      netLinks: [],
-      netCategories: [],
-      activeName: "gwas",
-      isSetup: false,
-      setParaInfo: {
-        p_cor: [0.2, 1.2],
-        n_cor: [-1.2, -0.2],
-        p_cutoff: 0.05,
+  export default {
+    name: "Genetic_cor",
+    components: {
+      SetPara,
+      GwasTable,
+      GwasTableShow,
+      RgTable,
+      BarPlot,
+      PairTable,
+      ErrorPairScatter,
+      NetTable,
+      HeatMap,
+      NetGraph,
+    },
+    data() {
+      return {
+        traitsDetailData: "",
+        timer: "",
+        isaside: true,
+        traits: [],
+        gwas_ids: [],
+        iscomfirmed: false,
+        target_gwas_ids: [],
+        ishdl: true,
+        isrg: true,
+        isTop: true,
+        rgmodel: "hdl",
+        rgmodel_pre: "hdl",
+        rg_h2: "rg",
+        subName: "",
+        className: "",
+        barPlotData: "",
+        barTable: "",
+        scatterData: "",
+        scatterkey: [],
+        iswaiting: true,
+        isresults: false,
+        job_step: 0,
+        netkey: [],
+        heatMapData: [],
+        colHeatMapData: [],
+        netNodes: [],
+        netLinks: [],
+        netCategories: [],
+        activeName: "gwas",
+        isSetup: false,
+        setParaInfo: {
+          p_cor: [0.2, 1.2],
+          n_cor: [-1.2, -0.2],
+          p_cutoff: 0.05,
+        },
+        setParaInfoBar: {
+          p_cor: [0.2, 1.2],
+          n_cor: [-1.2, -0.2],
+          p_cutoff: 0.05,
+        },
+        setParaInfoScatter: {
+          p_cor: [0, 2],
+          n_cor: [-2, 0],
+          p_cutoff: 1,
+        },
+        setParaInfoNet: {
+          p_cor: [0, 2],
+          n_cor: [-2, 0],
+          p_cutoff: 1,
+        },
+      };
+    },
+    created() {
+      if (this.$route.params.traits) {
+        // this.gwas_ids = this.$route.params.gwas;
+        this.traits = this.$route.params.traits;
+      }
+      if (this.traits.length == 0) {
+        // this.gwas_ids = [25, 11, 49, 7];
+        this.traits = [
+          "Coronary artery disease",
+          "Extreme bmi",
+          "Type 2 Diabetes",
+          "HDL cholesterol",
+          "Total cholesterol in large LDL",
+          "Usual walking pace",
+          "Vitamin and mineral supplements: Vitamin D"
+        ];
+      }
+    },
+    mounted() {
+      this.getGwasInfo();
+      this.hideTabs(1);
+      this.hideTabs(2);
+      this.hideTabs(3);
+    },
+    watch: {
+      activeName: function (val) {
+        if (val === "first") {
+          this.getBarInfo();
+          this.setParaInfo = this.setParaInfoBar;
+        }
+        if (val === "second") {
+          this.getScatterInfo();
+          this.setParaInfo = this.setParaInfoScatter;
+        }
+        if (val === "third") {
+          this.getNetInfo();
+          this.setParaInfo = this.setParaInfoNet;
+        }
+        if(val == 'gwas'){
+          this.getGwasInfo()
+        }
       },
-      setParaInfoBar: {
-        p_cor: [0.2, 1.2],
-        n_cor: [-1.2, -0.2],
-        p_cutoff: 0.05,
+      colHeatMapData: function (val) {
+        if (val.length == 0) {
+          this.isresults = false;
+          this.iswaiting = true;
+        } else if (val.length > 0) {
+          this.isresults = true;
+          this.iswaiting = false;
+        }
       },
-      setParaInfoScatter: {
-        p_cor: [0, 2],
-        n_cor: [-2, 0],
-        p_cutoff: 1,
+      iscomfirmed: function(val){
+        if (this.iscomfirmed){
+          this.showTabs(1)
+        }else{
+          this.hideTabs(1)
+          this.hideTabs(2)
+          this.hideTabs(3)
+        }
+      }
+
+    },
+    methods: {
+      getGwasInfo() {
+        this.$refs.gwastab.queryTraitsDetail(this.traits);
       },
-      setParaInfoNet: {
-        p_cor: [0, 2],
-        n_cor: [-2, 0],
-        p_cutoff: 1,
+      getGwasSel(data) {
+        this.gwas_ids = [];
+        this.traits = [];
+        for (var i of data) {
+          this.gwas_ids.push(i["id"]);
+          this.traits.push(i["trait"]);
+        }
       },
-    };
-  },
-  created() {
-    if (this.$route.params.traits) {
-      // this.gwas_ids = this.$route.params.gwas;
-      this.traits = this.$route.params.traits;
-    }
-    if (this.traits.length == 0) {
-      // this.gwas_ids = [25, 11, 49, 7];
-      this.traits = [
-        "Coronary artery disease",
-        "Extreme bmi",
-        "Type 2 Diabetes",
-        "HDL cholesterol",
-        "Total cholesterol in large LDL",
-      ];
-    }
-  },
-  mounted() {
-    this.getGwasInfo();
-    this.hideTabs(2);
-    this.hideTabs(3);
-  },
-  watch: {
-    activeName: function (val) {
-      if (val === "first") {
-        this.getBarInfo();
-        this.setParaInfo = this.setParaInfoBar;
-      }
-      if (val === "second") {
-        this.getScatterInfo();
-        this.setParaInfo = this.setParaInfoScatter;
-      }
-      if (val === "third") {
-        this.getNetInfo();
-        this.setParaInfo = this.setParaInfoNet;
-      }
-    },
-    colHeatMapData: function (val) {
-      if (val.length == 0) {
-        this.isresults = false;
-        this.iswaiting = true;
-      } else if (val.length > 0) {
-        this.isresults = true;
-        this.iswaiting = false;
-      }
-    },
-  },
-  methods: {
-    getGwasInfo() {
-      this.$refs.gwastab.queryTraitsDetail(this.traits);
-    },
-    getGwasSel(data) {
-      this.gwas_ids = [];
-      this.traits = [];
-      for (var i of data) {
-        this.gwas_ids.push(i["id"]);
-        this.traits.push(i["trait"]);
-      }
-    },
-    getBarInfo() {
-      this.timer = new Date().getTime();
-      if (this.isrg) {
-        this.className =
-          "BarPlot of Genetic Correlation ( rg," +
-          this.rgmodel.toUpperCase() +
-          ")";
-        this.subName = this.traits[0];
-      } else {
-        this.className =
-          "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
-        this.subName = "";
-      }
-      this.$refs.rgtable.getTables(this.rgmodel, this.rg_h2);
-    },
-    getBarData(data) {
-      this.barPlotData = data;
-    },
-    getCurrentGwas() {
-      var table_info = this.$refs.rgtable.bar_table;
-      var target_gwas_ids = [table_info[0]["gwas1_id"]];
-      for (var i of table_info) {
-        target_gwas_ids.push(i["gwas2_id"]);
-      }
-      return target_gwas_ids;
-    },
-    getScatterInfo() {
-      this.timer = new Date().getTime();
-      var target_gwas_ids = this.getCurrentGwas();
-      this.$refs.pairtable.getTables(target_gwas_ids, this.rg_h2);
-    },
-    resetNet() {
-      (this.heatMapData = []),
+      toConfirm(){
+        this.getBarInfo()
+        this.activeName = 'first'
+        this.iscomfirmed = true
+      },
+      toEdit(){
+        this.iscomfirmed = false
+        this.getGwasInfo()
+      },
+      getBarInfo() {
+        return new Promise((resolve, reject) => {
+
+          this.timer = new Date().getTime();
+          if (this.isrg) {
+            this.className =
+              "BarPlot of Genetic Correlation ( rg," +
+              this.rgmodel.toUpperCase() +
+              ")";
+            this.subName = this.traits[0];
+          } else {
+            this.className =
+              "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
+            this.subName = "";
+          }
+        })
+      },
+      getBarData(data) {
+        return new Promise((resolve, reject) => {
+          this.barPlotData = data[0];
+          this.barTable = data[1]
+          this.target_gwas_ids = [this.barTable[0]["gwas1_id"]];
+          for (var i of this.barTable) {
+            this.target_gwas_ids.push(i["gwas2_id"]);
+          }
+        })
+      },
+      getScatterInfo() {
+        this.timer = new Date().getTime();
+        this.$refs.pairtable.getTables(this.target_gwas_ids, this.rg_h2);
+      },
+      resetNet() {
+        (this.heatMapData = []),
         (this.colHeatMapData = []),
         (this.netNodes = []),
         (this.netLinks = []),
         (this.netCategories = []);
-    },
-    getNetInfo() {
-      this.timer = new Date().getTime();
-      var target_gwas_ids = this.getCurrentGwas();
-      if (this.netkey.sort().toString() !== target_gwas_ids.sort().toString()) {
-        this.netkey = target_gwas_ids;
-        this.resetNet();
-        this.$refs.nettable.getTables(target_gwas_ids, this.rgmodel);
-      }
-    },
-    hideTabs(idx) {
-      // this.$refs.tabs.$children[0].$el.style.display = 'none';
-      this.$nextTick(() => {
-        this.$refs.tabs.$children[0].$refs.tabs[idx].style.display = "none";
-        // this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
-      });
-    },
-    showTabs(idx) {
-      this.$nextTick(() => {
-        this.$refs.tabs.$children[0].$refs.tabs[idx].style.display =
-          "inline-block";
-      });
-    },
-    removeTab(targetName) {
-      if (targetName === "second") {
-        this.hideTabs(1);
-        this.activeName = "first";
-      }
-      if (targetName === "third") {
-        this.hideTabs(2);
-        this.netkey = [];
-        this.resetNet();
-        this.activeName = "first";
-      }
-      if (targetName === "first") {
-        this.$notify({
-          message: "No Closing for Tab1",
-          type: "error",
-          duration: 1000,
+      },
+      getNetInfo() {
+        this.timer = new Date().getTime();
+        if (this.netkey.sort().toString() !== this.target_gwas_ids.sort().toString() || this.rgmodel !== this.rgmodel_pre) {
+          this.netkey = this.target_gwas_ids;
+          this.rgmodel_pre = this.rgmodel
+          this.resetNet();
+          this.$refs.nettable.getTables(this.target_gwas_ids, this.rgmodel);
+        }
+      },
+      hideTabs(idx) {
+        // this.$refs.tabs.$children[0].$el.style.display = 'none';
+        this.$nextTick(() => {
+          this.$refs.tabs.$children[0].$refs.tabs[idx].style.display = "none";
+          // this.$refs.tabs.$children[0].$refs.tabs[2].style.display = "none";
         });
-      }
-    },
-    changeModel() {
-      this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
-      this.getBarInfo();
-    },
-    changeRg() {
-      this.isrg ? (this.rg_h2 = "rg") : (this.rg_h2 = "h2");
-      this.getBarInfo();
-    },
-    changeTrait2Model() {
-      this.getBarInfo();
-    },
-    getScatterData_rg(data) {
-      var scatterData = [];
-      for (var i of data) {
-        var items = [
-          i["trait1_x"] + "_vs_" + i["trait1_y"],
-          i["cor_HDL"],
-          i["cor_LDSC"],
-          i["cor_LDSC"] - i["cor_se_LDSC"] * 1.96,
-          i["cor_LDSC"] + i["cor_se_LDSC"] * 1.96,
-          i["cor_HDL"] - i["cor_se_HDL"] * 1.96,
-          i["cor_HDL"] + i["cor_se_HDL"] * 1.96,
-        ];
-        scatterData.push(items);
-      }
-      return scatterData;
-    },
-    getScatterData_h2(data) {
-      var scatterData = [];
-      for (var i of data) {
-        var items = [
-          i["trait2_x"],
-          i["h2_HDL"],
-          i["h2_LDSC"],
-          i["h2_LDSC"] - i["h2_se_LDSC"] * 1.96,
-          i["h2_LDSC"] + i["h2_se_LDSC"] * 1.96,
-          i["h2_HDL"] - i["h2_se_HDL"] * 1.96,
-          i["h2_HDL"] + i["h2_se_HDL"] * 1.96,
-        ];
-        scatterData.push(items);
-      }
-      return scatterData;
-    },
-
-    getScatterData(data) {
-      this.scatterData = this.getScatterData_rg(data);
-      // this.scatterData = this.getScatterData_h2(data)
-    },
-    getNetData(data) {
-      this.heatMapData = data.heatmap.data;
-      this.colHeatMapData = data.heatmap.col;
-      this.netLinks = data.network.links;
-      this.netNodes = data.network.nodes;
-      this.netCategories = [
-        {
-          name: "类别0",
-        },
-      ];
-    },
-    fig1aset() {
-      this.isSetup = false;
-      if (this.activeName === "first") {
+      },
+      showTabs(idx) {
+        this.$nextTick(() => {
+          this.$refs.tabs.$children[0].$refs.tabs[idx].style.display =
+            "inline-block";
+        });
+      },
+      removeTab(targetName) {
+        if (targetName === "second") {
+          this.hideTabs(2);
+          this.activeName = "first";
+        }
+        if (targetName === "third") {
+          this.hideTabs(3);
+          this.netkey = [];
+          this.resetNet();
+          this.activeName = "first";
+        }
+        if (targetName === "first") {
+          this.$notify({
+            message: "No Closing for Tab1",
+            type: "error",
+            duration: 1000,
+          });
+        }
+      },
+      changeModel() {
+        this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
         this.getBarInfo();
-      } else if (this.activeName === "second") {
-        this.getScatterInfo();
-      }
+      },
+      changeRg() {
+        this.isrg ? (this.rg_h2 = "rg") : (this.rg_h2 = "h2");
+        this.getBarInfo();
+      },
+      changeTrait2Model() {
+        this.getBarInfo();
+      },
+      getScatterData_rg(data) {
+        var scatterData = [];
+        for (var i of data) {
+          var items = [
+            i["trait1_x"] + " _vs_ " + i["trait2_x"],
+            i["cor_HDL"],
+            i["cor_LDSC"],
+            i["cor_LDSC"] - i["cor_se_LDSC"] * 1.96,
+            i["cor_LDSC"] + i["cor_se_LDSC"] * 1.96,
+            i["cor_HDL"] - i["cor_se_HDL"] * 1.96,
+            i["cor_HDL"] + i["cor_se_HDL"] * 1.96,
+          ];
+          scatterData.push(items);
+        }
+        return scatterData;
+      },
+      getScatterData_h2(data) {
+        var scatterData = [];
+        for (var i of data) {
+          var items = [
+            i["trait2_x"],
+            i["h2_HDL"],
+            i["h2_LDSC"],
+            i["h2_LDSC"] - i["h2_se_LDSC"] * 1.96,
+            i["h2_LDSC"] + i["h2_se_LDSC"] * 1.96,
+            i["h2_HDL"] - i["h2_se_HDL"] * 1.96,
+            i["h2_HDL"] + i["h2_se_HDL"] * 1.96,
+          ];
+          scatterData.push(items);
+        }
+        return scatterData;
+      },
+      getScatterData(data) {
+        this.scatterData = this.getScatterData_rg(data);
+        // this.scatterData = this.getScatterData_h2(data)
+      },
+      getNetData(data) {
+        this.heatMapData = data.heatmap.data;
+        this.colHeatMapData = data.heatmap.col;
+        this.netLinks = data.network.links;
+        this.netNodes = data.network.nodes;
+        this.netCategories = [{
+          name: "类别0",
+        }, ];
+      },
+      fig1aset() {
+        this.isSetup = false;
+        if (this.activeName === "first") {
+          this.getBarInfo();
+        } else if (this.activeName === "second") {
+          this.getScatterInfo();
+        }
+      },
     },
-  },
-};
+  };
+
 </script>
 
 <style scoped>
-.el-header {
-  background-color: #b3c0d1;
-  color: #333;
-  line-height: 60px;
-}
+  .el-header {
+    background-color: #b3c0d1;
+    color: #333;
+    line-height: 60px;
+  }
 
-.el-aside {
-  color: #333;
-}
+  .el-aside {
+    color: #333;
+  }
 
-.el-select {
-  position: relative;
-  font-size: 14px;
-  display: inline-block;
-  width: 10%;
-}
+  .el-select {
+    position: relative;
+    font-size: 14px;
+    display: inline-block;
+    width: 10%;
+  }
 
-/deep/ .el-submenu__title {
-  font-size: 18px;
-}
+  /deep/ .el-submenu__title {
+    font-size: 18px;
+  }
 
-/deep/ .el-menu-item-group__title {
-  padding: 7px 0 7px 20px;
-  font-size: 16px;
-  color: #a0b85d;
-}
+  /deep/ .el-menu-item-group__title {
+    padding: 7px 0 7px 20px;
+    font-size: 16px;
+    color: #a0b85d;
+  }
+
 </style>
