@@ -2,7 +2,7 @@
   <div>
     <!--页码 开始-->
     <pagination v-show="total_items > 0" :total="total_items" :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size" @pagination="getTables(model,rg_h2)" />
+      :limit.sync="listQuery.page_size" @pagination="getTables(rgModel,rg_h2)" />
     <!--页码 结束-->
     <!--表格 开始-->
     <el-table ref="traitsPairTable" :data="tableData" border fit highlight-current-row style="width: 100%;"
@@ -38,10 +38,16 @@
       Pagination,
     },
     props: {
+      in_bar_table:{
+        type:Array
+      },
       gwasIds: {
         type: Array,
       },
       rgModel: {
+        type: String,
+      },
+      rg_h2:{
         type: String,
       },
       filterInfo: {
@@ -54,7 +60,7 @@
     data() {
       return {
         tableData: [],
-        multiSel: [],
+        multiSel: this.in_bar_table,
         bar_table: [],
         total_items: 0,
         listQuery: {
@@ -63,7 +69,6 @@
           sort: "+id",
         },
         model: this.rgModel,
-        rg_h2: 'rg',
         barPlotData_rg: {
           data: [],
           col: [],
@@ -147,6 +152,9 @@
       if (this.gwasIds.length > 0){
         this.getTables(this.rgModel, this.rg_h2) 
       }
+      if (this.multiSel.length >0 & !this.isTop){
+          this.toggleSelection(this.multiSel)
+      }
     },
     watch: {
       multiSel: function (val) {
@@ -156,10 +164,17 @@
       },
       rgModel: function (val) {
         this.model = val
-        this.$refs.traitsPairTable.clearSelection()
+        // this.$refs.traitsPairTable.clearSelection()
       },
     },
     methods: {
+      toggleSelection(rows) {
+      this.$nextTick(() => {
+        rows.forEach((row) => {
+          this.$refs.traitsPairTable.toggleRowSelection(row, true);
+        });
+      });
+    },
       getRowKeys(row) {
         return row.id
       },
@@ -167,9 +182,7 @@
         this.multiSel = val
       },
       getTables(model_in, rg_h2) {
-        this.model = model_in,
         this.rg_h2 = rg_h2
-        this.$refs.traitsPairTable.clearSelection()
         postPairCor({
           value: this.gwasIds,
           query: this.listQuery,
@@ -203,7 +216,11 @@
       getBarPic(rg_h2) {
         this.bar_table = (this.isTop ? this.tableData : this.multiSel)
         this.reset_bar(rg_h2)
-                  var sorted_keys_array = Object.keys(this.bar_table).sort((a, b) => {
+        if (this.bar_table.length == 0){
+          this.$emit("barPlotData", [this.barPlotData_rg,this.bar_table]);
+          return
+        }
+        var sorted_keys_array = Object.keys(this.bar_table).sort((a, b) => {
             return this.bar_table[b].cor - this.bar_table[a].cor
           })
         if (rg_h2 == 'rg') {

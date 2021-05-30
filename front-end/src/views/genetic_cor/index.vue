@@ -6,13 +6,13 @@
           <template slot="title"><i class="el-icon-setting"></i>Methods Selection</template>
           <div style="text-align: center">
             <el-switch style="display: block" v-model="ishdl" active-color="#13ce66" inactive-color="#ff4949"
-              active-text="HDL" inactive-text="LDSC" @change="changeModel" :disabled="activeName !== 'first'">
+              active-text="HDL" inactive-text="LDSC" @change="changeModel" :disabled="activeName !== 'first' && activeName !== 'gwas' ">
             </el-switch>
           </div>
 
-          <div v-show="activeName == 'first'" style="text-align: center; margin-top:10px">
+          <div v-show="activeName == 'first' || activeName == 'gwas' " style="text-align: center; margin-top:10px">
             <el-switch style="display: block" v-model="isrg" active-color="#13ce66" inactive-color="#ff4949"
-              active-text="rg" inactive-text="h2" @change="changeRg" :disabled="activeName !== 'first'">
+              active-text="rg" inactive-text="h2" @change="changeRg">
             </el-switch>
           </div>
         </el-submenu>
@@ -25,12 +25,12 @@
               hideTabs(1)
               hideTabs(2)
               hideTabs(3)
-              iscomfirmed=false;
+              isconfirmed=false;
               activeName = 'gwas';
-            ">ReSelect Traits </el-menu-item>
+            "> <i class="el-icon-edit"></i> ReSelect Traits </el-menu-item>
 
 
-          <el-menu-item i><i class="el-icon-back"></i> Back Home to ReInput</el-menu-item>
+          <el-menu-item ><i class="el-icon-back"></i> Back Home to ReInput</el-menu-item>
 
           <el-menu-item-group>
             <template slot="title">Trait1</template>
@@ -50,13 +50,13 @@
           </el-menu-item-group>
         </el-submenu>
 
-        <el-submenu index="3" v-show='iscomfirmed'>
+        <el-submenu index="3" v-show='isconfirmed'>
           <template slot="title"><i class="el-icon-menu"></i>Further Exploring</template>
           <el-menu-item @click="activeName = 'first'">BarPlot of Trait1 vs Others</el-menu-item>
           <el-menu-item @click="
               showTabs(2);
               activeName = 'second';
-            ">Scatter of HDL vs LDSC </el-menu-item>
+            ">Scatter(rg) of HDL vs LDSC </el-menu-item>
           <el-menu-item @click="
               showTabs(3);
               activeName = 'third';
@@ -110,10 +110,10 @@
           round
           plain
           type="primary"
-          icon="el-icon-search"
+          icon="el-icon-check"
           style="margin-bottom: 30px"
           @click="toConfirm()"
-          >Confirmed
+          >Confirm and GO
         </el-button>
 
         <el-button
@@ -126,11 +126,11 @@
           >Edit
         </el-button>
       
-            <div v-if="iscomfirmed">
+            <div v-if="isconfirmed">
                 <gwas-table-show  :key="22" @gwasSel="getGwasSel" ref="gwastab"></gwas-table-show>
 
             </div>
-             <div>
+             <div v-else>
                 <gwas-table  :key="33" @gwasSel="getGwasSel" ref="gwastab"></gwas-table>
             </div>           
 
@@ -144,8 +144,8 @@
               </div>
             </el-row>
 
-            <rg-table :key="timer" @barPlotData="getBarData" :gwasIds="gwas_ids" :rgModel="rgmodel"
-              :filterInfo="setParaInfoBar" :isTop="isTop" ref="rgtable"></rg-table>
+            <rg-table :key="timer" @barPlotData="getBarData"  :rg_h2="rg_h2" :gwasIds="gwas_ids" :rgModel="rgmodel"
+              :filterInfo="setParaInfoBar" :isTop="isTop" :in_bar_table="barTable" ref="rgtable"></rg-table>
           </el-tab-pane>
 
           <el-tab-pane label="Scatter" name="second">
@@ -222,7 +222,7 @@
         isaside: true,
         traits: [],
         gwas_ids: [],
-        iscomfirmed: false,
+        isconfirmed: false,
         target_gwas_ids: [],
         ishdl: true,
         isrg: true,
@@ -233,7 +233,7 @@
         subName: "",
         className: "",
         barPlotData: "",
-        barTable: "",
+        barTable: [],
         scatterData: "",
         scatterkey: [],
         iswaiting: true,
@@ -320,13 +320,14 @@
           this.iswaiting = false;
         }
       },
-      iscomfirmed: function(val){
-        if (this.iscomfirmed){
+      isconfirmed: function(val){
+        if (this.isconfirmed){
           this.showTabs(1)
         }else{
           this.hideTabs(1)
           this.hideTabs(2)
           this.hideTabs(3)
+          this.barTable = []
         }
       }
 
@@ -344,17 +345,23 @@
         }
       },
       toConfirm(){
+        this.isconfirmed = true
         this.getBarInfo()
         this.activeName = 'first'
-        this.iscomfirmed = true
       },
       toEdit(){
-        this.iscomfirmed = false
+        this.isconfirmed = false
+        this.$confirm("You will edit and reselect traits and close all anlysis tabs?","Note",{
+            type: "warnings",
+          }).then(()=>{
         this.getGwasInfo()
+          }
+          ).catch(_ => {this.isconfirmed = true
+            this.getBarInfo()
+            this.activeName = 'first'
+          })
       },
       getBarInfo() {
-        return new Promise((resolve, reject) => {
-
           this.timer = new Date().getTime();
           if (this.isrg) {
             this.className =
@@ -367,17 +374,16 @@
               "BarPlot of Heritability  ( h2, " + this.rgmodel.toUpperCase() + ")";
             this.subName = "";
           }
-        })
       },
       getBarData(data) {
-        return new Promise((resolve, reject) => {
           this.barPlotData = data[0];
           this.barTable = data[1]
-          this.target_gwas_ids = [this.barTable[0]["gwas1_id"]];
-          for (var i of this.barTable) {
-            this.target_gwas_ids.push(i["gwas2_id"]);
+          if (this.barTable.length >1) {
+            this.target_gwas_ids = [this.barTable[0]["gwas1_id"]];
+            for (var i of this.barTable) {
+              this.target_gwas_ids.push(i["gwas2_id"]);
+            }
           }
-        })
       },
       getScatterInfo() {
         this.timer = new Date().getTime();
@@ -424,12 +430,16 @@
           this.activeName = "first";
         }
         if (targetName === "first") {
-          this.$notify({
-            message: "No Closing for Tab1",
-            type: "error",
-            duration: 1000,
-          });
+          this.$confirm("You will close all anlysis tabs and return to traits tab?","Note",{
+            type: "warnings",
+          }).then(()=>{
+            this.hideTabs(1)
+            this.activeName='gwas'
+            this.isconfirmed = false
+          }
+          )
         }
+
       },
       changeModel() {
         this.ishdl ? (this.rgmodel = "hdl") : (this.rgmodel = "ldsc");
