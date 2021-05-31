@@ -430,14 +430,17 @@
           this.activeName = "first";
         }
         if (targetName === "first") {
+          this.isconfirmed = false
           this.$confirm("You will close all anlysis tabs and return to traits tab?","Note",{
             type: "warnings",
           }).then(()=>{
             this.hideTabs(1)
+            this.getGwasInfo()
             this.activeName='gwas'
-            this.isconfirmed = false
           }
-          )
+          ).catch(_ => {
+            this.isconfirmed = true
+          })
         }
 
       },
