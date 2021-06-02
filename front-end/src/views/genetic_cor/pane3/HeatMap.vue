@@ -3,7 +3,8 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+// import echarts from 'echarts'
+import * as echarts from 'echarts';
 require('echarts/theme/macarons') // echarts theme
 // import resize from './mixins/resize'
 
@@ -93,6 +94,13 @@ export default {
           axisPointer: {
             type: 'shadow'
           },
+                      backgroundColor: "rgba(255,255,255,0.8)",
+            color: "black",
+            borderWidth: "1", //边框宽度设置1
+            borderColor: "gray", //设置边框颜色
+            textStyle: {
+              color: "black" //设置文字颜色
+            },
           formatter: function(params) {
             var value = params.value
             var source = value[0]

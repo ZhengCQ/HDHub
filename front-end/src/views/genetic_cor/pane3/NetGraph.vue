@@ -3,8 +3,9 @@
 </template>
 
 <script>
-import echarts from 'echarts'
-require('echarts/theme/macarons') // echarts theme
+// import echarts from 'echarts'
+import * as echarts from 'echarts';
+import 'echarts/theme/fruit' // echarts theme
 // import resize from './mixins/resize'
 
 export default {
@@ -76,7 +77,7 @@ export default {
           text: 'Circular layout' + " (" + this.rgModel.toUpperCase() + ")",
           subtext: this.className,
           left: '20%',
-                    textStyle: {
+          textStyle: {
             fontSize: 26
           },
           subtextStyle:{
@@ -87,7 +88,13 @@ export default {
           top: '40%',
           bottom: '10%'
         },
-        tooltip: {},
+        tooltip: {            backgroundColor: "rgba(255,255,255,0.8)",
+            color: "black",
+            borderWidth: "1", //边框宽度设置1
+            borderColor: "gray", //设置边框颜色
+            textStyle: {
+              color: "black" //设置文字颜色
+            },},
         legend: [{
           data: categories.map(function(a) {
             return a.name
@@ -108,14 +115,15 @@ export default {
             type: 'graph',
             layout: 'circular',
             circular: {
-              rotateLabel: false
+              rotateLabel: true
             },
             data: nodes,
             links: links,
             categories: categories,
             roam: true,
             label: {
-              position: 'outside',
+              show:true,
+              position: 'inside',
               formatter: function(value) {
               if (value.name.length > 20) {
                 return value.name.substring(0, 20) + '...'
@@ -135,7 +143,7 @@ export default {
             emphasis: {
               focus: 'adjacency',
                 lineStyle: {
-                    width: 10
+                    width: 5
                 }
             }
           }

@@ -6,6 +6,7 @@ import itertools
 import seaborn as sns
 from itertools import cycle
 from matplotlib import colors
+from collections import Counter
 
 def fetch_paired_gwas(gwas1, gwas2_lst, filter_cut):
     if len(gwas2_lst)>0:
@@ -65,12 +66,69 @@ def pre_heatmap(df):
     return hData,hcol
 
 def pre_network(df):
+    def get_nodes(df):
+        counts = Counter(list(df['trait1']) + list(df['trait2'])).most_common()
+        df_counts = pd.DataFrame(counts)
+        df_counts = df_counts.sort_values(0,ascending=False).reset_index(drop=True)
+        df_counts = df_counts.reset_index()
+        df_counts.columns=['id','name','value']
+        df_counts['symbolSize'] = np.log2(df_counts['value'])*10
+        nodes=[]
+        for each in df_counts.to_dict('records'):
+            each.setdefault("itemStyle",{"normal": {"color": colors.to_hex(next(color_infos))}}),
+            each.setdefault('category',0)
+            each.setdefault('tooltip', f" Trait: {each['name']} <br>Number of Nodes: {int(each['value']/2)}")
+            nodes.append(each)
+        return nodes
+    
+    def get_links(df,name2id):
+        links = []
+        for idx,each in df.iterrows():
+            tmp = {}
+            tmp.setdefault('id',idx)
+            tmp.setdefault('source',name2id[each['trait1']])
+            tmp.setdefault('target',name2id[each['trait2']])
+
+            
+            if abs(each['cor'])>0.7:
+                width= abs(each['cor']) * 5
+            elif abs(each['cor'])>0.5:
+                width= abs(each['cor']) * 4
+            elif abs(each['cor'])>0.3:
+                width= abs(each['cor']) * 3
+            elif abs(each['cor'])>0.1:
+                width= abs(each['cor']) * 2
+            else:
+                width= abs(each['cor'])
+            
+            if each['cor']>0:
+                tmp.setdefault("lineStyle",{"width": width,"color":'red'})
+            else:
+                tmp.setdefault("lineStyle",{"width": width,"color":'green'})
+            tmp.setdefault('tooltip', f" Trait1: {each[0]} <br>Trait2: {each[1]}<br> rg: {each['cor']}")
+            links.append(tmp)
+        return links
+    
     color_set = sns.color_palette(palette=None, n_colors=10)
     color_infos = cycle(color_set)
+    df = df[(df['p'] <0.05)]
+    nodes = get_nodes(df)
+    name2id = {i[0]:i[1] for i in pd.DataFrame(nodes)[['name','id']].to_dict('split')['data']}
+    links = get_links(df,name2id)
+    return nodes,links
+            
+
+
+def pre_network_pre(df):
+    color_set = sns.color_palette(palette=None, n_colors=10)
+    color_infos = cycle(color_set)
+    
     df_pivot = pd.pivot_table(df, index='trait1',columns='trait2',values='cor')
+    df = df[(df['p'] <0.05)]
     hcol = list(df_pivot.columns)
     traits_ids_idx = [i for i,v in enumerate(hcol)]
-    
+    print(hcol)
+    print(traits_ids_idx)
     nodes = []
     traits_idx=0
     for each in hcol:
