@@ -89,17 +89,18 @@ def pre_network(df):
             tmp.setdefault('source',name2id[each['trait1']])
             tmp.setdefault('target',name2id[each['trait2']])
 
-            
-            if abs(each['cor'])>0.7:
-                width= abs(each['cor']) * 5
+            if abs(each['cor'])>0.9:
+                width = 3
+            elif abs(each['cor'])>0.7:
+                width= 2.5
             elif abs(each['cor'])>0.5:
-                width= abs(each['cor']) * 4
+                width= 2
             elif abs(each['cor'])>0.3:
-                width= abs(each['cor']) * 3
+                width= 1.5
             elif abs(each['cor'])>0.1:
-                width= abs(each['cor']) * 2
+                width= 1
             else:
-                width= abs(each['cor'])
+                width= 0.5
             
             if each['cor']>0:
                 tmp.setdefault("lineStyle",{"width": width,"color":'red'})

@@ -138,7 +138,7 @@ export default {
             },
             lineStyle: {
               color: 'source',
-              curveness: 0.3
+              curveness: 0.1
             },
             emphasis: {
               focus: 'adjacency',
